@@ -1,0 +1,129 @@
+/* ============================================================
+   hud.css — HUD superior (vidas + temporizador), panel de
+   preguntas temporal y overlays de estado.
+   ============================================================ */
+
+/* ===================== HUD SUPERIOR ===================== */
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 84px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 0 24px;
+  background: linear-gradient(180deg, rgba(18,10,31,0.95), rgba(18,10,31,0.4));
+  border-bottom: 1px solid var(--c-neon-pink);
+  z-index: 50;
+}
+
+.hud__player { display: flex; align-items: center; gap: 10px; }
+.hud__player--p1 { justify-self: start; }
+.hud__player--p2 { justify-self: end; }
+
+.hud__label {
+  font-family: var(--font-display);
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+.hud__player--p1 .hud__label { color: var(--c-neon-cyan); text-shadow: var(--glow-cyan); }
+.hud__player--p2 .hud__label { color: var(--c-neon-pink); text-shadow: var(--glow-pink); }
+
+/* --- Corazones (vidas) --- */
+.hud__hearts { display: flex; gap: 6px; }
+.heart {
+  width: 22px;
+  height: 22px;
+  background: var(--c-blood);
+  box-shadow: var(--glow-blood);
+  /* forma de corazón con clip-path */
+  clip-path: path("M11 20 L2 11 A5 5 0 0 1 11 5 A5 5 0 0 1 20 11 Z");
+  transition: opacity 150ms, transform 150ms;
+}
+/* Estado visual: corazón perdido */
+.heart.is-lost {
+  background: var(--c-text-dim);
+  box-shadow: none;
+  opacity: 0.3;
+  transform: scale(0.8);
+}
+
+/* --- Temporizador central --- */
+.hud__timer { justify-self: center; }
+.hud__timer-value {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: var(--c-neon-lime);
+  text-shadow: var(--glow-lime);
+}
+/* Estado visual: tiempo crítico */
+.hud__timer-value.is-critical {
+  color: var(--c-blood);
+  text-shadow: var(--glow-blood);
+  animation: neon-pulse 350ms infinite;
+}
+
+/* ===================== PANEL DE PREGUNTAS ===================== */
+.question-panel {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translate(-50%, -20px);
+  width: min(620px, 80%);
+  padding: 14px 22px;
+  text-align: center;
+  background: rgba(7, 6, 10, 0.92);
+  border: 2px solid var(--c-neon-pink);
+  box-shadow: var(--glow-pink);
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms, transform 200ms;
+  z-index: 60;
+}
+/* Estado visual: panel visible (lo activa QuestionView) */
+.question-panel.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.question-panel__topic {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  color: var(--c-neon-cyan);
+  margin-bottom: 6px;
+}
+.question-panel__text {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--c-text);
+}
+
+/* ===================== OVERLAYS DE ESTADO ===================== */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(7, 6, 10, 0.88);
+  z-index: 200;
+  text-align: center;
+}
+.overlay.is-visible { display: flex; }
+
+.overlay__title {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  letter-spacing: 6px;
+  color: var(--c-neon-pink);
+  animation: glitch-shift 1.6s infinite;
+}
+.overlay__subtitle { color: var(--c-neon-cyan); letter-spacing: 1px; }
+.overlay__hint { color: var(--c-text-dim); }

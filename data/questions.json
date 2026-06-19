@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "title": "TC-Survival — Banco de preguntas",
+    "version": "1.0.0",
+    "description": "Preguntas de Teoría de la Computación. Cada pregunta tiene 4 respuestas mapeadas a las 4 esquinas del tablero (zonas de respuesta).",
+    "zoneMap": {
+      "0": "zone-top-left",
+      "1": "zone-top-right",
+      "2": "zone-bottom-left",
+      "3": "zone-bottom-right"
+    }
+  },
+  "questions": [
+    {
+      "id": "afd-001",
+      "topic": "AFD",
+      "difficulty": 1,
+      "text": "¿Qué característica define a un Autómata Finito Determinista (AFD)?",
+      "answers": [
+        "Cada estado tiene exactamente una transición por cada símbolo del alfabeto",
+        "Permite transiciones vacías (epsilon)",
+        "Puede tener varias transiciones para el mismo símbolo",
+        "Usa una pila auxiliar para decidir"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": "afnd-001",
+      "topic": "AFND",
+      "difficulty": 2,
+      "text": "¿Qué puede tener un AFND que un AFD no?",
+      "answers": [
+        "Más de un estado final",
+        "Transiciones epsilon y múltiples transiciones por símbolo",
+        "Un alfabeto infinito",
+        "Memoria ilimitada de cinta"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": "regex-001",
+      "topic": "Expresiones Regulares",
+      "difficulty": 1,
+      "text": "La expresión regular (a|b)* describe...",
+      "answers": [
+        "Solo la cadena vacía",
+        "Cadenas con exactamente una 'a' y una 'b'",
+        "Toda cadena formada por 'a' y 'b', incluida la vacía",
+        "Cadenas que terminan en 'ab'"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": "glc-001",
+      "topic": "Gramáticas Libres de Contexto",
+      "difficulty": 2,
+      "text": "¿Qué forma tienen las producciones de una Gramática Libre de Contexto?",
+      "answers": [
+        "α → β con α y β cadenas cualesquiera",
+        "A → α donde A es un único no terminal",
+        "Solo A → aB (lineales por la derecha)",
+        "No permiten símbolos terminales"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": "pda-001",
+      "topic": "Autómatas de Pila",
+      "difficulty": 3,
+      "text": "¿Qué recurso adicional distingue a un Autómata de Pila de un autómata finito?",
+      "answers": [
+        "Una cinta infinita de lectura/escritura",
+        "Un registro de estados cuántico",
+        "Una pila (stack) como memoria auxiliar",
+        "Un oráculo de decisión"
+      ],
+      "correctIndex": 2
+    },
+    {
+      "id": "tm-001",
+      "topic": "Máquinas de Turing",
+      "difficulty": 3,
+      "text": "¿Qué hace única a una Máquina de Turing frente a un Autómata de Pila?",
+      "answers": [
+        "Puede leer y escribir en una cinta infinita moviéndose en ambos sentidos",
+        "Solo puede aceptar lenguajes regulares",
+        "No tiene estados de aceptación",
+        "Carece de cualquier tipo de memoria"
+      ],
+      "correctIndex": 0
+    },
+    {
+      "id": "regex-002",
+      "topic": "Expresiones Regulares",
+      "difficulty": 2,
+      "text": "¿Cuál de estos lenguajes NO es regular?",
+      "answers": [
+        "Cadenas que terminan en '01'",
+        "{ aⁿbⁿ | n ≥ 0 }",
+        "Cadenas de longitud par",
+        "Cadenas que contienen 'aa'"
+      ],
+      "correctIndex": 1
+    },
+    {
+      "id": "glc-002",
+      "topic": "Gramáticas Libres de Contexto",
+      "difficulty": 3,
+      "text": "El lenguaje { aⁿbⁿ | n ≥ 0 } puede ser generado por...",
+      "answers": [
+        "Una expresión regular",
+        "Un AFD",
+        "Una Gramática Libre de Contexto",
+        "Ningún formalismo conocido"
+      ],
+      "correctIndex": 2
+    }
+  ]
+}

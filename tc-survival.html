@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TC-Survival · Teoría de la Computación</title>
+
+  <!-- ===== ESTILOS (separados por responsabilidad) ===== -->
+  <link rel="stylesheet" href="styles/theme.css" />   <!-- Paleta Splatterpunk / Neopunk, variables, fuentes -->
+  <link rel="stylesheet" href="styles/board.css" />   <!-- Tablero 2D, personajes, misil -->
+  <link rel="stylesheet" href="styles/hud.css" />     <!-- HUD, vidas, temporizador, panel de preguntas -->
+</head>
+<body>
+  <!-- ============================================================
+       CONTENEDOR PRINCIPAL (PLANO 2D)
+       Límites fijos definidos en CSS. Todo elemento que se mueve
+       por JS (jugadores, misil) usa position:absolute relativo a él.
+       ============================================================ -->
+  <main id="game-container" class="game-container">
+
+    <!-- ===================== HUD SUPERIOR ===================== -->
+    <header id="hud" class="hud">
+
+      <!-- Vidas Jugador 1 (3 corazones) -->
+      <section id="hud-p1" class="hud__player hud__player--p1" data-player="1">
+        <span class="hud__label">P1</span>
+        <div class="hud__hearts" id="hearts-p1">
+          <span class="heart" data-index="0"></span>
+          <span class="heart" data-index="1"></span>
+          <span class="heart" data-index="2"></span>
+        </div>
+      </section>
+
+      <!-- Temporizador central -->
+      <section id="hud-timer" class="hud__timer">
+        <span id="timer-value" class="hud__timer-value">00</span>
+      </section>
+
+      <!-- Vidas Jugador 2 (3 corazones) -->
+      <section id="hud-p2" class="hud__player hud__player--p2" data-player="2">
+        <div class="hud__hearts" id="hearts-p2">
+          <span class="heart" data-index="0"></span>
+          <span class="heart" data-index="1"></span>
+          <span class="heart" data-index="2"></span>
+        </div>
+        <span class="hud__label">P2</span>
+      </section>
+    </header>
+
+    <!-- ============== PANEL DE PREGUNTAS (temporal) ==============
+         Aparece centrado/arriba. La clase .is-visible lo muestra;
+         se rellena dinámicamente desde data/questions.json (QuestionView).
+         ============================================================ -->
+    <section id="question-panel" class="question-panel" aria-live="polite">
+      <span class="question-panel__topic" id="question-topic">TEMA</span>
+      <p class="question-panel__text" id="question-text">Esperando pregunta…</p>
+    </section>
+
+    <!-- ===================== TABLERO 2D ===================== -->
+    <section id="board" class="board">
+
+      <!-- Las 4 esquinas = ZONAS DE RESPUESTA (IDs requeridos) -->
+      <div id="zone-top-left"     class="answer-zone answer-zone--tl"     data-zone="0"><span class="answer-zone__text"></span></div>
+      <div id="zone-top-right"    class="answer-zone answer-zone--tr"     data-zone="1"><span class="answer-zone__text"></span></div>
+      <div id="zone-bottom-left"  class="answer-zone answer-zone--bl"     data-zone="2"><span class="answer-zone__text"></span></div>
+      <div id="zone-bottom-right" class="answer-zone answer-zone--br"     data-zone="3"><span class="answer-zone__text"></span></div>
+
+      <!-- Personajes (movidos por JS con position:absolute) -->
+      <div id="player1" class="entity player player--p1" data-player="1"></div>
+      <div id="player2" class="entity player player--p2" data-player="2"></div>
+
+      <!-- Misil perseguidor (movido por JS) -->
+      <div id="missile" class="entity missile"></div>
+
+      <!-- Capa de elementos flotantes / decoración (partículas, salpicaduras) -->
+      <div id="floating-layer" class="floating-layer" aria-hidden="true"></div>
+    </section>
+
+    <!-- ===================== OVERLAYS DE ESTADO ===================== -->
+    <div id="overlay-start" class="overlay overlay--start is-visible">
+      <h1 class="overlay__title">TC-SURVIVAL</h1>
+      <p class="overlay__subtitle">P1: <strong>WASD</strong> &nbsp;·&nbsp; P2: <strong>Flechas</strong></p>
+      <p class="overlay__hint">Pulsa <strong>ENTER</strong> para empezar</p>
+    </div>
+
+    <div id="overlay-gameover" class="overlay overlay--gameover">
+      <h1 class="overlay__title" id="gameover-title">FIN</h1>
+      <p class="overlay__hint">Pulsa <strong>ENTER</strong> para reiniciar</p>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       JAVASCRIPT (módulos ES6). game.js es el punto de entrada y
+       orquesta Modelos, Vistas y Controladores (MVC).
+       ============================================================ -->
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>

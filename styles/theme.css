@@ -1,0 +1,73 @@
+/* ============================================================
+   theme.css — Paleta y atmósfera SPLATTERPUNK / NEOPUNK
+   Variables globales, tipografía, fondo y efectos base.
+   ============================================================ */
+
+:root {
+  /* --- Paleta neón sobre negro sucio --- */
+  --c-bg-0:        #07060a;   /* fondo más oscuro */
+  --c-bg-1:        #120a1f;   /* fondo panel */
+  --c-grid:        #1e1133;   /* líneas de rejilla */
+  --c-neon-pink:   #ff2bd6;   /* acento principal */
+  --c-neon-cyan:   #00f0ff;   /* acento secundario */
+  --c-neon-lime:   #b6ff00;   /* aciertos / vida */
+  --c-blood:       #ff1133;   /* salpicadura / daño */
+  --c-toxic:       #9d00ff;   /* misil / peligro */
+  --c-text:        #f3e9ff;
+  --c-text-dim:    #8a7ba6;
+
+  /* --- Tipografía --- */
+  --font-display: "Courier New", "Consolas", monospace;
+  --font-body:    "Courier New", monospace;
+
+  /* --- Sombras neón reutilizables --- */
+  --glow-pink: 0 0 6px var(--c-neon-pink), 0 0 18px var(--c-neon-pink);
+  --glow-cyan: 0 0 6px var(--c-neon-cyan), 0 0 18px var(--c-neon-cyan);
+  --glow-lime: 0 0 6px var(--c-neon-lime), 0 0 16px var(--c-neon-lime);
+  --glow-blood: 0 0 8px var(--c-blood), 0 0 22px var(--c-blood);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background:
+    radial-gradient(circle at 50% 0%, #2a0f3f 0%, var(--c-bg-0) 60%),
+    var(--c-bg-0);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  /* textura de scanlines tipo CRT neopunk */
+  background-blend-mode: screen;
+}
+
+body::after {
+  /* Scanlines superpuestas para la estética neopunk/CRT */
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.18) 3px
+  );
+  z-index: 9999;
+}
+
+/* Animación de glitch reutilizable para títulos */
+@keyframes glitch-shift {
+  0%, 100% { text-shadow: var(--glow-pink); transform: translate(0, 0); }
+  25%      { text-shadow: 2px 0 var(--c-neon-cyan), -2px 0 var(--c-blood); }
+  50%      { transform: translate(-1px, 1px); }
+  75%      { text-shadow: -2px 0 var(--c-neon-cyan), 2px 0 var(--c-neon-pink); }
+}
+
+/* Pulso neón genérico */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}

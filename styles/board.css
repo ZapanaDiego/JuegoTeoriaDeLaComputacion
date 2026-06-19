@@ -1,0 +1,133 @@
+/* ============================================================
+   board.css — Plano 2D, zonas de respuesta, personajes y misil.
+   El tablero tiene LÍMITES FIJOS. Jugadores y misil usan
+   position:absolute para que el JS los reposicione (left/top).
+   ============================================================ */
+
+/* Contenedor principal: ocupa toda la pantalla, es el marco del juego.
+   Usa 100dvw/100dvh para respetar barras dinámicas en móvil. */
+.game-container {
+  position: relative;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--c-bg-1);
+  box-shadow: inset 0 0 80px rgba(157, 0, 255, 0.3);
+  overflow: hidden;
+}
+
+/* --- Tablero: el área jugable con límites fijos --- */
+.board {
+  position: absolute;
+  top: 84px;            /* deja espacio para el HUD superior */
+  left: 0;
+  width: 100%;
+  height: calc(100% - 84px);
+  /* Rejilla neón de fondo */
+  background-image:
+    linear-gradient(var(--c-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ===================== ZONAS DE RESPUESTA (4 esquinas) ===================== */
+.answer-zone {
+  position: absolute;
+  width: clamp(200px, 22vw, 380px);
+  height: clamp(130px, 20vh, 240px);
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  color: var(--c-text);
+  border: 2px dashed var(--c-neon-cyan);
+  background: rgba(0, 240, 255, 0.06);
+  box-shadow: inset var(--glow-cyan);
+  transition: background 120ms, box-shadow 120ms, transform 120ms;
+}
+.answer-zone__text { pointer-events: none; }
+
+.answer-zone--tl { top: 12px;    left: 12px; }
+.answer-zone--tr { top: 12px;    right: 12px; }
+.answer-zone--bl { bottom: 12px; left: 12px; }
+.answer-zone--br { bottom: 12px; right: 12px; }
+
+/* --- Estados visuales de las zonas --- */
+.answer-zone.is-correct {        /* zona correcta revelada */
+  border-color: var(--c-neon-lime);
+  background: rgba(182, 255, 0, 0.18);
+  box-shadow: var(--glow-lime);
+}
+.answer-zone.is-wrong {          /* zona incorrecta seleccionada */
+  border-color: var(--c-blood);
+  background: rgba(255, 17, 51, 0.2);
+  box-shadow: var(--glow-blood);
+}
+
+/* ===================== ENTIDADES (movidas por JS) ===================== */
+.entity {
+  position: absolute;   /* CLAVE: el JS controla left/top */
+  top: 0;
+  left: 0;
+  will-change: transform, left, top;
+}
+
+/* --- Personajes --- */
+.player {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  transition: filter 80ms;
+}
+.player--p1 {
+  background: radial-gradient(circle at 30% 30%, #fff, var(--c-neon-cyan));
+  box-shadow: var(--glow-cyan);
+}
+.player--p2 {
+  background: radial-gradient(circle at 30% 30%, #fff, var(--c-neon-pink));
+  box-shadow: var(--glow-pink);
+}
+
+/* Estados visuales de personaje */
+.player.is-hurt   { animation: hit-flash 280ms ease-out; }
+.player.is-dead   { opacity: 0.25; filter: grayscale(1); }
+.player.is-shield { outline: 2px solid var(--c-neon-lime); outline-offset: 3px; }
+
+@keyframes hit-flash {
+  0%, 100% { filter: none; }
+  50%      { filter: drop-shadow(0 0 10px var(--c-blood)) brightness(2); }
+}
+
+/* --- Misil perseguidor --- */
+.missile {
+  width: 18px;
+  height: 18px;
+  border-radius: 50% 50% 50% 0;     /* gota / proyectil */
+  background: radial-gradient(circle at 40% 40%, #fff, var(--c-toxic));
+  box-shadow: 0 0 8px var(--c-toxic), 0 0 20px var(--c-blood);
+  animation: neon-pulse 600ms infinite;
+}
+.missile.is-armed   { box-shadow: var(--glow-blood); }
+
+/* ===================== ELEMENTOS FLOTANTES / SALPICADURAS ===================== */
+.floating-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.splatter {            /* salpicadura splatterpunk inyectada por JS */
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, var(--c-blood) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: splatter-fade 900ms forwards;
+}
+@keyframes splatter-fade {
+  from { transform: scale(0.2); opacity: 0.9; }
+  to   { transform: scale(1.4); opacity: 0; }
+}
