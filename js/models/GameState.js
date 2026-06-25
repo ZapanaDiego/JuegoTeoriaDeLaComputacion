@@ -10,9 +10,11 @@ import { Missile } from './Missile.js';
 
 /** Fases posibles del juego. */
 export const Phase = Object.freeze({
-  START:    'start',
-  PLAYING:  'playing',
-  GAMEOVER: 'gameover',
+  START:          'start',
+  QUESTION_POPUP: 'question_popup',   // muestra la pregunta 10s
+  COUNTDOWN:      'countdown',         // cuenta regresiva 3-2-1
+  PLAYING:        'playing',
+  GAMEOVER:       'gameover',
 });
 
 export class GameState {

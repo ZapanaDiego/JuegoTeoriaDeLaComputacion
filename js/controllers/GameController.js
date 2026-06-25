@@ -16,6 +16,12 @@ export class GameController {
     this.board = boardView;
     this.hud = hudView;
     this.qView = questionView;
+
+    // Temporizadores internos para el popup y la cuenta regresiva
+    this._popupTimer = 0;
+    this._popupDuration = 10;   // segundos
+    this._countdownTimer = 0;
+    this._countdownCurrent = 3;
   }
 
   /** Arranque inicial: pintar HUD y dejar listo el overlay de inicio. */
@@ -28,13 +34,23 @@ export class GameController {
 
   /** Comienza / reinicia la partida (lo dispara ENTER). */
   startGame() {
-    if (this.state.phase === Phase.PLAYING) return;
+    if (this.state.phase === Phase.PLAYING
+        || this.state.phase === Phase.QUESTION_POPUP
+        || this.state.phase === Phase.COUNTDOWN) return;
+
     this.state.reset();
-    this.state.zones = this.board.readZones();   // geometría real de las 4 esquinas
+    this.state.phase = Phase.QUESTION_POPUP;   // aún no es PLAYING
+    this.state.zones = this.board.readZones();
     this.hud.showStart(false);
     this.hud.showGameover(false);
-    this.questions.nextQuestion();
-    this.state.timeLeft = this.state.roundTime;
+
+    // Cargar pregunta y mostrarla en el popup
+    const q = this.questions.nextQuestion();
+    this.hud.showQuestionPopup(q);
+
+    // Iniciar temporizador del popup
+    this._popupTimer = this._popupDuration;
+
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
   }
@@ -43,12 +59,72 @@ export class GameController {
      UPDATE — avanza la lógica del juego (dt en segundos).
      ======================================================== */
   update(dt) {
+    // --- Fase: Popup de pregunta (10 s) ---
+    if (this.state.phase === Phase.QUESTION_POPUP) {
+      this._updatePopup(dt);
+      return;
+    }
+
+    // --- Fase: Cuenta regresiva 3-2-1 ---
+    if (this.state.phase === Phase.COUNTDOWN) {
+      this._updateCountdown(dt);
+      return;
+    }
+
     if (!this.state.isPlaying) return;
 
     this._updatePlayers(dt);   // 1) movimiento WASD / flechas
     this._updateMissile(dt);   // 2) persecución del misil
     this._checkCollisions();   // 3) colisiones AABB
     this._updateTimer(dt);     // 4) temporizador de ronda
+  }
+
+  // --------------------------------------------------------
+  // POPUP DE PREGUNTA (10 s)
+  // --------------------------------------------------------
+  _updatePopup(dt) {
+    this._popupTimer -= dt;
+    this.hud.updatePopupTimer(this._popupTimer, this._popupDuration);
+
+    if (this._popupTimer <= 0) {
+      // Ocultar popup → pasar a cuenta regresiva
+      this.hud.hideQuestionPopup();
+      this._startCountdown();
+    }
+  }
+
+  // --------------------------------------------------------
+  // CUENTA REGRESIVA 3-2-1
+  // --------------------------------------------------------
+  _startCountdown() {
+    this.state.phase = Phase.COUNTDOWN;
+    this._countdownCurrent = 3;
+    this._countdownTimer = 1;  // 1 segundo por dígito
+
+    // Pequeño delay para que la animación de salida del popup termine
+    setTimeout(() => {
+      this.hud.updateCountdownNumber(this._countdownCurrent);
+      this.hud.showCountdown(true);
+    }, 420);
+  }
+
+  _updateCountdown(dt) {
+    this._countdownTimer -= dt;
+
+    if (this._countdownTimer <= 0) {
+      this._countdownCurrent -= 1;
+
+      if (this._countdownCurrent <= 0) {
+        // ¡Empezar el juego!
+        this.hud.showCountdown(false);
+        this.state.phase = Phase.PLAYING;
+        this.state.timeLeft = this.state.roundTime;
+        return;
+      }
+
+      this.hud.updateCountdownNumber(this._countdownCurrent);
+      this._countdownTimer = 1;
+    }
   }
 
   // --------------------------------------------------------
