@@ -76,6 +76,23 @@
       <div id="floating-layer" class="floating-layer" aria-hidden="true"></div>
     </section>
 
+    <!-- ============ OVERLAY: POPUP DE PREGUNTA (10 s) ============ -->
+    <div id="overlay-question-popup" class="overlay overlay--question-popup">
+      <div class="popup-card">
+        <span class="popup-card__badge" id="popup-topic">TEMA</span>
+        <p class="popup-card__text" id="popup-text">Pregunta…</p>
+        <div class="popup-card__timer-bar">
+          <div class="popup-card__timer-fill" id="popup-timer-fill"></div>
+        </div>
+        <span class="popup-card__timer-label" id="popup-timer-label">10</span>
+      </div>
+    </div>
+
+    <!-- ============ OVERLAY: CUENTA REGRESIVA 3-2-1 ============ -->
+    <div id="overlay-countdown" class="overlay overlay--countdown">
+      <span class="countdown__number" id="countdown-number">3</span>
+    </div>
+
     <!-- ===================== OVERLAYS DE ESTADO ===================== -->
     <div id="overlay-start" class="overlay overlay--start is-visible">
       <h1 class="overlay__title">TC-SURVIVAL</h1>
