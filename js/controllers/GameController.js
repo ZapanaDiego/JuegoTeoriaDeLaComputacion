@@ -169,6 +169,9 @@ export class GameController {
   // --------------------------------------------------------
   // 3) COLISIONES AABB
   // --------------------------------------------------------
+  _// --------------------------------------------------------
+  // 3) COLISIONES AABB (CORREGIDO)
+  // --------------------------------------------------------
   _checkCollisions() {
     const m = this.state.missile;
 
@@ -181,7 +184,6 @@ export class GameController {
     }
 
     // === [COLISIÓN AABB: JUGADOR vs ZONA DE RESPUESTA] ==
-    // Si ya estamos procesando una respuesta, congelamos la detección física
     if (this._isEvaluating) return;
 
     for (const player of this.state.players) {
@@ -190,15 +192,16 @@ export class GameController {
       for (const zone of this.state.zones) {
         if (isInsideZone(player.box, zone)) {
           
-          // A) Activar bloqueo inmediato (Lock)
+          // 1. Activar bloqueo inmediato para que no vuelva a chocar en el siguiente frame
           this._isEvaluating = true;
 
-          // B) Evaluar en QuestionController usando el index de la zona
-          const esCorrecto = this.questions.resolve(zone.index);
+          // === SOLUCIÓN AQUÍ ===
+          // Usamos la propiedad nativa del objeto 'zone' en lugar de un método roto
+          const esCorrecto = zone.isCorrect; 
 
-          // C) Aplicar consecuencias asociadas
+          // 2. Aplicar consecuencias asociadas
           if (esCorrecto) {
-            this._handleAcierto(player);
+            this._handleAcierto(player, zone);
           } else {
             this._handleFallo(player, zone);
           }
@@ -212,7 +215,7 @@ export class GameController {
   // --------------------------------------------------------
   // MANEJO DE CONSECUENCIAS (ACIERTOS / FALLOS)
   // --------------------------------------------------------
-  _handleAcierto(player) {
+  _handleAcierto(player, zone) {
     console.log(`[ACIERTO] Jugador ${player.id} respondió correctamente.`);
     
     // Beneficio: recuperar 1 vida hasta un máximo de 3
@@ -221,8 +224,16 @@ export class GameController {
       this.hud.renderLives(player);
     }
 
-    // Pequeña pausa de 1.5s para apreciar el acierto antes del popup
+    // Feedback visual usando las clases nativas de tu board.css
+    const zonesElements = document.querySelectorAll('.answer-zone');
+    const zoneElement = zonesElements[zone.index];
+    if (zoneElement) {
+      zoneElement.classList.add('is-correct'); // Verde lima neón
+    }
+
+    // Pausa de 1.5s para apreciar el acierto antes de limpiar y saltar
     setTimeout(() => {
+      if (zoneElement) zoneElement.classList.remove('is-correct');
       this._cargarSiguientePregunta();
     }, 1500);
   }
@@ -238,10 +249,22 @@ export class GameController {
     }
     this.hud.renderLives(player);
 
-    // Feedback visual: buscar la zona en el DOM y hacerla parpadear mediante CSS
-    const zoneElement = document.querySelector(`[data-zone-index="${zone.index}"]`);
+    // Aplicar animación de daño (.is-hurt) e .is-dead si corresponde al jugador
+    const playerElement = document.querySelector(`.player--${player.id}`);
+    if (playerElement) {
+      playerElement.classList.add('is-hurt');
+      setTimeout(() => playerElement.classList.remove('is-hurt'), 280);
+      
+      if (!player.alive) {
+        playerElement.classList.add('is-dead');
+      }
+    }
+
+    // Feedback visual de la zona usando las clases nativas de tu board.css
+    const zonesElements = document.querySelectorAll('.answer-zone');
+    const zoneElement = zonesElements[zone.index];
     if (zoneElement) {
-      zoneElement.classList.add('flash-red');
+      zoneElement.classList.add('is-wrong'); // Rojo sangre neón
     }
 
     // Verificar si es el fin de la partida completa
@@ -251,25 +274,25 @@ export class GameController {
       return;
     }
 
-    // Esperar 2s para que vean el parpadeo en rojo antes de saltar la pregunta
+    // Esperar 2s para que vean el error antes de limpiar y saltar la pregunta
     setTimeout(() => {
-      if (zoneElement) zoneElement.classList.remove('flash-red');
+      if (zoneElement) zoneElement.classList.remove('is-wrong');
       this._cargarSiguientePregunta();
     }, 2000);
   }
 
   _cargarSiguientePregunta() {
-    // Liberar candado de evaluación
+    // 1. Liberar el candado de evaluación para la nueva ronda
     this._isEvaluating = false;
 
-    // Transición hacia la pantalla de espera
+    // 2. Transición hacia la fase de lectura congelada
     this.state.phase = Phase.QUESTION_POPUP;
 
-    // Cargar y pintar la nueva pregunta
+    // 3. Obtener la nueva pregunta y renderizarla en el DOM
     const proximaPregunta = this.questions.nextQuestion();
     this.hud.showQuestionPopup(proximaPregunta);
 
-    // Reiniciar cronómetro del popup
+    // 4. RESET DEL TEMPORIZADOR DEL POPUP (Evita que el juego se quede colgado)
     this._popupTimer = this._popupDuration;
   }
 
@@ -292,9 +315,18 @@ export class GameController {
       this.state.players.forEach((player) => {
         if (player.alive) {
           player.lives -= 1;
+          
+          // Efecto visual de daño por tiempo agotado
+          const playerElement = document.querySelector(`.player--${player.id}`);
+          if (playerElement) {
+            playerElement.classList.add('is-hurt');
+            setTimeout(() => playerElement.classList.remove('is-hurt'), 280);
+          }
+
           if (player.lives <= 0) {
             player.alive = false;
             player.lives = 0;
+            if (playerElement) playerElement.classList.add('is-dead');
           }
           this.hud.renderLives(player);
         }
