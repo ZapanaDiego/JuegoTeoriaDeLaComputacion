@@ -9,13 +9,14 @@ import { Phase } from '../models/GameState.js';
 import { clampToBounds, aabbIntersects, isInsideZone } from '../modules/collision.js';
 
 export class GameController {
-  constructor({ state, inputCtrl, questionCtrl, boardView, hudView, questionView }) {
+  constructor({ state, inputCtrl, questionCtrl, boardView, hudView, questionView, audioCtrl}) {
     this.state = state;
     this.input = inputCtrl;
     this.questions = questionCtrl;
     this.board = boardView;
     this.hud = hudView;
     this.qView = questionView;
+    this.audioCtrl = audioCtrl;
 
     // Temporizadores internos para el popup y la cuenta regresiva
     this._popupTimer = 0;
@@ -94,6 +95,8 @@ export class GameController {
     this.hud.showGameover(false);
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
+
+    this.audioCtrl.playPrimary();
   }
 
   /* ========================================================
@@ -117,6 +120,7 @@ export class GameController {
 
     // Si el temporizador activó el GAMEOVER tras el descuento, cortamos el frame inmediatamente
     if (this.state.phase === Phase.GAMEOVER) return;
+
 
     // Movimiento físico y colisiones (solo si la ronda sigue su curso)
     this._updatePlayers(dt);   
