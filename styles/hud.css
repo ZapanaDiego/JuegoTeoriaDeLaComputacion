@@ -127,3 +127,125 @@
 }
 .overlay__subtitle { color: var(--c-neon-cyan); letter-spacing: 1px; }
 .overlay__hint { color: var(--c-text-dim); }
+
+/* ============= POPUP DE PREGUNTA (10 s) ============= */
+.overlay--question-popup {
+  background: rgba(7, 6, 10, 0.92);
+  backdrop-filter: blur(6px);
+}
+
+.popup-card {
+  position: relative;
+  width: min(640px, 85%);
+  padding: 32px 36px 24px;
+  background: linear-gradient(
+    145deg,
+    rgba(18, 10, 31, 0.96),
+    rgba(7, 6, 10, 0.98)
+  );
+  border: 2px solid var(--c-neon-pink);
+  border-radius: 12px;
+  box-shadow:
+    var(--glow-pink),
+    inset 0 0 30px rgba(157, 0, 255, 0.15);
+  text-align: center;
+  animation: popup-enter 400ms ease-out;
+}
+
+@keyframes popup-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Efecto de salida */
+.popup-card.is-exiting {
+  animation: popup-exit 400ms ease-in forwards;
+}
+@keyframes popup-exit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.85) translateY(-20px);
+  }
+}
+
+.popup-card__badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--c-neon-cyan);
+  text-shadow: var(--glow-cyan);
+  padding: 3px 14px;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.popup-card__text {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--c-text);
+  margin-bottom: 22px;
+}
+
+/* Barra de tiempo */
+.popup-card__timer-bar {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.popup-card__timer-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--c-neon-cyan), var(--c-neon-pink));
+  border-radius: 3px;
+  transition: width 1s linear;
+  box-shadow: 0 0 8px var(--c-neon-cyan);
+}
+
+.popup-card__timer-label {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--c-neon-lime);
+  text-shadow: var(--glow-lime);
+}
+
+/* ============= CUENTA REGRESIVA 3-2-1 ============= */
+.overlay--countdown {
+  background: rgba(7, 6, 10, 0.92);
+  backdrop-filter: blur(4px);
+}
+
+.countdown__number {
+  font-family: var(--font-display);
+  font-size: 10rem;
+  font-weight: bold;
+  color: var(--c-neon-pink);
+  text-shadow:
+    var(--glow-pink),
+    0 0 40px rgba(255, 43, 214, 0.5);
+  animation: countdown-pulse 1s ease-in-out infinite;
+}
+
+@keyframes countdown-pulse {
+  0%   { transform: scale(0.6); opacity: 0.3; }
+  50%  { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.6); opacity: 0.3; }
+}
