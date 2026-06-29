@@ -52,13 +52,20 @@ export class BoardView {
 
   /** Render principal por frame. */
   render(state) {
+    const now = performance.now();
+
     this._place(this.el.p1, state.player1);
     this._place(this.el.p2, state.player2);
     this._place(this.el.missile, state.missile);
 
+    // Estados: muerte
     this.el.p1.classList.toggle('is-dead', !state.player1.alive);
     this.el.p2.classList.toggle('is-dead', !state.player2.alive);
     this.el.missile.classList.toggle('is-armed', state.missile.active);
+
+    // Estados: escudo / invulnerabilidad (parpadeo i-frames)
+    this.el.p1.classList.toggle('is-shield', state.player1.alive && state.player1.isInvulnerable(now));
+    this.el.p2.classList.toggle('is-shield', state.player2.alive && state.player2.isInvulnerable(now));
   }
 
   /** Marca brevemente una zona como correcta / incorrecta. */
@@ -79,7 +86,19 @@ export class BoardView {
     setTimeout(() => s.remove(), 900);
   }
 
-  /** Animación de daño en un jugador. */
+  /**
+   * Animación de daño + transición a escudo de invulnerabilidad.
+   * Reproduce hit-flash y luego el parpadeo is-shield se activa
+   * automáticamente en render() gracias al timestamp invulnerableUntil.
+   */
+  flashHurtWithShield(playerId) {
+    const el = playerId === 'p1' ? this.el.p1 : this.el.p2;
+    el.classList.remove('is-shield');            // forzar re-trigger
+    el.classList.add('is-hurt');
+    setTimeout(() => el.classList.remove('is-hurt'), 300);
+  }
+
+  /** Animación de daño en un jugador (compat legacy). */
   flashHurt(playerId) {
     const el = playerId === 'p1' ? this.el.p1 : this.el.p2;
     el.classList.add('is-hurt');

@@ -18,11 +18,9 @@ export class GameController {
     this.qView = questionView;
     this.audioCtrl = audioCtrl;
 
-    // Temporizadores internos para el popup y la cuenta regresiva
+    // Temporizadores internos para el popup
     this._popupTimer = 0;
     this._popupDuration = 10;   // segundos
-    this._countdownTimer = 0;
-    this._countdownCurrent = 3;
 
     // === MECANISMO DE BLOQUEO (COOLDOWN/LOCK) ===
     this._isEvaluating = false; 
@@ -32,6 +30,8 @@ export class GameController {
   init() {
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
+    this.hud.renderScore(this.state.player1);
+    this.hud.renderScore(this.state.player2);
     this.hud.renderTimer(this.state.timeLeft);
     this.hud.showStart(true);
   }
@@ -55,8 +55,7 @@ export class GameController {
   /** Comienza / reinicia la partida (lo dispara ENTER). */
   startGame() {
     if (this.state.phase === Phase.PLAYING
-        || this.state.phase === Phase.QUESTION_POPUP
-        || this.state.phase === Phase.COUNTDOWN) return;
+        || this.state.phase === Phase.QUESTION_POPUP) return;
 
     this.state.reset();
     this.state.phase = Phase.QUESTION_POPUP;   // aún no es PLAYING
@@ -75,6 +74,8 @@ export class GameController {
 
     this.state.players.forEach(p => {
       p.hasAnswered = false;
+      p.insideZoneIndex = -1;
+      p.score = 0;
       const playerElement = document.querySelector(`.player--${p.id}`);
       if (playerElement) {
         playerElement.classList.remove('is-dead', 'is-hurt');
@@ -95,6 +96,8 @@ export class GameController {
     this.hud.showGameover(false);
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
+    this.hud.renderScore(this.state.player1);
+    this.hud.renderScore(this.state.player2);
 
     this.audioCtrl.playPrimary();
   }
@@ -105,11 +108,6 @@ export class GameController {
   update(dt) {
     if (this.state.phase === Phase.QUESTION_POPUP) {
       this._updatePopup(dt);
-      return;
-    }
-
-    if (this.state.phase === Phase.COUNTDOWN) {
-      this._updateCountdown(dt);
       return;
     }
 
@@ -150,22 +148,14 @@ export class GameController {
 
       // === CASO B: Tiempo Agotado (Castigo a los que NO respondieron) ===
       console.log("[TIEMPO AGOTADO] Penalizando solo a los que no pisaron casilla.");
+      const now = performance.now();
 
       this.state.players.forEach((player) => {
         if (player.alive && !player.hasAnswered) {
-          player.lives -= 1;
-          
-          const playerElement = document.querySelector(`.player--${player.id}`);
-          if (playerElement) {
-            playerElement.classList.add('is-hurt');
-            setTimeout(() => playerElement.classList.remove('is-hurt'), 280);
-          }
+          const result = player.loseLife(now);
+          if (result === false) return;   // i-frames activos → sin daño
 
-          if (player.lives <= 0) {
-            player.alive = false;
-            player.lives = 0;
-            if (playerElement) playerElement.classList.add('is-dead');
-          }
+          this.board.flashHurtWithShield(player.id);
           this.hud.renderLives(player);
         }
       });
@@ -193,8 +183,11 @@ export class GameController {
     // ANTES de que comience el escaneo de la nueva pregunta, alejándolos de los paneles.
     this._resetPlayerPositions();
 
-    // 1. Apagamos la bandera de respuesta de ambos jugadores
-    this.state.players.forEach(p => p.hasAnswered = false);
+    // 1. Apagamos la bandera de respuesta de ambos jugadores y reseteamos zona actual
+    this.state.players.forEach(p => {
+      p.hasAnswered = false;
+      p.insideZoneIndex = -1;
+    });
 
     // 2. Limpiamos las clases CSS del DOM anteriores (.is-correct y .is-wrong)
     const zonesElements = document.querySelectorAll('.answer-zone');
@@ -225,39 +218,9 @@ export class GameController {
 
     if (this._popupTimer <= 0) {
       this.hud.hideQuestionPopup();
-      this._startCountdown();
-    }
-  }
-
-  // --------------------------------------------------------
-  // CUENTA REGRESIVA 3-2-1
-  // --------------------------------------------------------
-  _startCountdown() {
-    this.state.phase = Phase.COUNTDOWN;
-    this._countdownCurrent = 3;
-    this._countdownTimer = 1;
-
-    setTimeout(() => {
-      this.hud.updateCountdownNumber(this._countdownCurrent);
-      this.hud.showCountdown(true);
-    }, 420);
-  }
-
-  _updateCountdown(dt) {
-    this._countdownTimer -= dt;
-
-    if (this._countdownTimer <= 0) {
-      this._countdownCurrent -= 1;
-
-      if (this._countdownCurrent <= 0) {
-        this.hud.showCountdown(false);
-        this.state.phase = Phase.PLAYING;
-        this.state.timeLeft = this.state.roundTime;
-        return;
-      }
-
-      this.hud.updateCountdownNumber(this._countdownCurrent);
-      this._countdownTimer = 1;
+      // Transición directa a PLAYING (sin cuenta regresiva)
+      this.state.phase = Phase.PLAYING;
+      this.state.timeLeft = this.state.roundTime;
     }
   }
 
@@ -267,18 +230,17 @@ export class GameController {
   _updatePlayers(dt) {
     const bounds = this.state.bounds;
 
-    if (this.state.player1.alive) {
-      const a1 = this.input.axisP1();
-      this.state.player1.x += a1.x * this.state.player1.speed * dt;
-      this.state.player1.y += a1.y * this.state.player1.speed * dt;
-      Object.assign(this.state.player1, clampToBounds(this.state.player1.box, bounds));
-    }
+    for (const player of this.state.players) {
+      if (!player.alive) continue;
 
-    if (this.state.player2.alive) {
-      const a2 = this.input.axisP2();
-      this.state.player2.x += a2.x * this.state.player2.speed * dt;
-      this.state.player2.y += a2.y * this.state.player2.speed * dt;
-      Object.assign(this.state.player2, clampToBounds(this.state.player2.box, bounds));
+      const axis = player.id === 'p1' ? this.input.axisP1() : this.input.axisP2();
+      player.x += axis.x * player.speed * dt;
+      player.y += axis.y * player.speed * dt;
+
+      // Clamp fluido a los bordes del canvas
+      const clamped = clampToBounds(player.box, bounds);
+      player.x = clamped.x;
+      player.y = clamped.y;
     }
   }
 
@@ -314,20 +276,32 @@ export class GameController {
 
     // === [JUGADOR vs ZONA DE RESPUESTA] ==
     for (const player of this.state.players) {
-      if (!player.alive || player.hasAnswered) continue;
+      if (!player.alive) continue;
 
+      let collidingZone = null;
       for (const zone of this.state.zones) {
         if (isInsideZone(player.box, zone)) {
-          player.hasAnswered = true;
-          const esCorrecto = zone.isCorrect; 
-
-          if (esCorrecto) {
-            this._handleAcierto(player, zone);
-          } else {
-            this._handleFallo(player, zone);
-          }
-          break; 
+          collidingZone = zone;
+          break;
         }
+      }
+
+      if (collidingZone) {
+        // Evaluar la respuesta si es la primera vez que entra a esta zona
+        if (player.insideZoneIndex !== collidingZone.index) {
+          player.insideZoneIndex = collidingZone.index;
+          player.hasAnswered = true;
+
+          const esCorrecto = this.questions.model.isCorrect(collidingZone.index);
+          if (esCorrecto) {
+            this._handleAcierto(player, collidingZone);
+          } else {
+            this._handleFallo(player, collidingZone);
+          }
+        }
+      } else {
+        // Si no está tocando ninguna zona, le permitimos volver a elegir
+        player.insideZoneIndex = -1;
       }
     }
   }
@@ -343,9 +317,14 @@ export class GameController {
       this.hud.renderLives(player);
     }
 
+    // Aumentar puntos +100
+    player.score += 100;
+    this.hud.renderScore(player);
+
     const zonesElements = document.querySelectorAll('.answer-zone');
     const zoneElement = zonesElements[zone.index];
     if (zoneElement) {
+      zoneElement.classList.remove('is-wrong');
       zoneElement.classList.add('is-correct');
     }
   }
@@ -353,28 +332,27 @@ export class GameController {
   _handleFallo(player, zone) {
     console.log(`[FALLO] Jugador ${player.id} seleccionó una zona incorrecta.`);
 
-    // Restamos exactamente UNA vida
-    player.lives -= 1;
-    
-    if (player.lives <= 0) {
-      player.alive = false;
-      player.lives = 0;
-    }
-    this.hud.renderLives(player);
+    const now = performance.now();
+    const result = player.loseLife(now);
 
-    const playerElement = document.querySelector(`.player--${player.id}`);
-    if (playerElement) {
-      playerElement.classList.add('is-hurt');
-      setTimeout(() => playerElement.classList.remove('is-hurt'), 280);
-      
-      if (!player.alive) {
-        playerElement.classList.add('is-dead');
-      }
+    // Si estaba invulnerable, no aplica daño
+    if (result === false) return;
+
+    // Disminuir puntos -25 (mínimo 0)
+    if (player.score < 25) {
+      player.score = 0;
+    } else {
+      player.score -= 25;
     }
+    this.hud.renderScore(player);
+
+    this.hud.renderLives(player);
+    this.board.flashHurtWithShield(player.id);
 
     const zonesElements = document.querySelectorAll('.answer-zone');
     const zoneElement = zonesElements[zone.index];
     if (zoneElement) {
+      zoneElement.classList.remove('is-correct');
       zoneElement.classList.add('is-wrong');
     }
 

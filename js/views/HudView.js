@@ -11,6 +11,10 @@ export class HudView {
       p1: [...document.querySelectorAll('#hearts-p1 .heart')],
       p2: [...document.querySelectorAll('#hearts-p2 .heart')],
     };
+    this.scores = {
+      p1: document.getElementById('score-p1'),
+      p2: document.getElementById('score-p2'),
+    };
     this.timerEl = document.getElementById('timer-value');
     this.overlayStart = document.getElementById('overlay-start');
     this.overlayGameover = document.getElementById('overlay-gameover');
@@ -35,6 +39,14 @@ export class HudView {
     set.forEach((heart, i) => {
       heart.classList.toggle('is-lost', i >= player.lives);
     });
+  }
+
+  /** Pinta el puntaje del jugador. */
+  renderScore(player) {
+    const el = this.scores[player.id];
+    if (el) {
+      el.textContent = `PTS: ${player.score}`;
+    }
   }
 
   /** Actualiza el temporizador y marca estado crítico. */

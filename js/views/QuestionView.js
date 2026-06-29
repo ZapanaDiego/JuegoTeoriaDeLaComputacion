@@ -18,14 +18,11 @@ export class QuestionView {
     ];
   }
 
-  /** Renderiza una pregunta: enunciado en panel, respuestas en zonas. */
+  /** Renderiza una pregunta: respuestas en zonas (enunciado omitido del panel superior). */
   show(question) {
-    this.topicEl.textContent = question.topic;
-    this.textEl.textContent = question.text;
     question.answers.forEach((ans, i) => {
       if (this.zoneTextEls[i]) this.zoneTextEls[i].textContent = ans;
     });
-    this.panel.classList.add('is-visible');
   }
 
   /** Oculta el panel (las respuestas pueden permanecer en las zonas). */

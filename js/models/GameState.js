@@ -43,8 +43,8 @@ export class GameState {
   get isPlaying() { return this.phase === Phase.PLAYING; }
 
   reset() {
-    this.player1.lives = 3; this.player1.alive = true;
-    this.player2.lives = 3; this.player2.alive = true;
+    this.player1.lives = 3; this.player1.alive = true; this.player1.score = 0; this.player1.insideZoneIndex = -1;
+    this.player2.lives = 3; this.player2.alive = true; this.player2.score = 0; this.player2.insideZoneIndex = -1;
     this.timeLeft = this.roundTime;
     this.isEvaluatingAnswer = false; 
     this.phase = Phase.PLAYING;

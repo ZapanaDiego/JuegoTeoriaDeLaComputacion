@@ -93,8 +93,19 @@
 
 /* Estados visuales de personaje */
 .player.is-hurt   { animation: hit-flash 280ms ease-out; }
-.player.is-dead   { opacity: 0.25; filter: grayscale(1); }
-.player.is-shield { outline: 2px solid var(--c-neon-lime); outline-offset: 3px; }
+.player.is-dead   { opacity: 0.25; filter: grayscale(1); pointer-events: none; }
+
+/* --- Escudo / invulnerabilidad (i-frames) --- */
+.player.is-shield {
+  animation: shield-blink 200ms steps(2, jump-none) infinite;
+  outline: 2px solid var(--c-neon-lime);
+  outline-offset: 3px;
+}
+
+@keyframes shield-blink {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px var(--c-neon-lime)); }
+  50%      { opacity: 0.35; filter: none; }
+}
 
 @keyframes hit-flash {
   0%, 100% { filter: none; }

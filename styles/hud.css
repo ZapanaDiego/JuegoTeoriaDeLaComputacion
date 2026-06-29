@@ -19,9 +19,19 @@
   z-index: 50;
 }
 
-.hud__player { display: flex; align-items: center; gap: 10px; }
-.hud__player--p1 { justify-self: start; }
-.hud__player--p2 { justify-self: end; }
+.hud__player {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.hud__player--p1 { justify-self: start; align-items: flex-start; }
+.hud__player--p2 { justify-self: end; align-items: flex-end; }
+
+.hud__player-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
 .hud__label {
   font-family: var(--font-display);
@@ -30,6 +40,23 @@
 }
 .hud__player--p1 .hud__label { color: var(--c-neon-cyan); text-shadow: var(--glow-cyan); }
 .hud__player--p2 .hud__label { color: var(--c-neon-pink); text-shadow: var(--glow-pink); }
+
+.hud__score {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+.hud__player--p1 .hud__score {
+  color: var(--c-neon-cyan);
+  opacity: 0.85;
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
+}
+.hud__player--p2 .hud__score {
+  color: var(--c-neon-pink);
+  opacity: 0.85;
+  text-shadow: 0 0 5px rgba(255, 43, 214, 0.4);
+}
 
 /* --- Corazones (vidas) --- */
 .hud__hearts { display: flex; gap: 6px; }
