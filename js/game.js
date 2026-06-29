@@ -6,15 +6,17 @@
    modular y escalable.
    ============================================================ */
 
-import { GameLoop }          from './modules/gameloop.js';
-import { GameState, Phase }  from './models/GameState.js';
-import { QuestionModel }     from './models/QuestionModel.js';
-import { BoardView }         from './views/BoardView.js';
-import { HudView }           from './views/HudView.js';
-import { QuestionView }      from './views/QuestionView.js';
-import { InputController }   from './controllers/InputController.js';
+import { GameLoop }           from './modules/gameloop.js';
+import { GameState, Phase }   from './models/GameState.js';
+import { QuestionModel }      from './models/QuestionModel.js';
+import { BoardView }          from './views/BoardView.js';
+import { HudView }            from './views/HudView.js';
+import { QuestionView }       from './views/QuestionView.js';
+import { InputController }    from './controllers/InputController.js';
 import { QuestionController } from './controllers/QuestionController.js';
-import { GameController }    from './controllers/GameController.js';
+import { GameController }     from './controllers/GameController.js';
+// 1. Importamos el nuevo controlador de audio
+import { AudioController }    from './controllers/AudioController.js'; 
 
 async function bootstrap() {
   /* ---------- 1) VISTAS (acceso al DOM ya cargado) ---------- */
@@ -30,10 +32,19 @@ async function bootstrap() {
   /* ---------- 3) CONTROLADORES ---------- */
   const inputCtrl    = new InputController();
   const questionCtrl = new QuestionController(qModel, questionView);
+  const audioCtrl    = new AudioController(); // 2. Instanciamos el controlador
+  
   await questionCtrl.init();                          // carga el JSON de preguntas
 
+  // 3. Inyectamos audioCtrl en el GameController
   const game = new GameController({
-    state, inputCtrl, questionCtrl, boardView, hudView, questionView,
+    state, 
+    inputCtrl, 
+    questionCtrl, 
+    boardView, 
+    hudView, 
+    questionView,
+    audioCtrl 
   });
 
   /* ---------- 4) ENTRADA: ENTER inicia / reinicia ---------- */
@@ -56,7 +67,7 @@ async function bootstrap() {
   loop.start();
 
   // Expuesto para depuración en consola
-  window.__TC = { state, game, loop };
+  window.__TC = { state, game, loop, audioCtrl };
 }
 
 // Espera a que el DOM esté listo antes de tocar elementos.
