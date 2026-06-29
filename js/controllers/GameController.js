@@ -99,7 +99,7 @@ export class GameController {
     this.hud.renderScore(this.state.player1);
     this.hud.renderScore(this.state.player2);
 
-    this.audioCtrl.playPrimary();
+    this.audioCtrl.playSecondary();
   }
 
   /* ========================================================
