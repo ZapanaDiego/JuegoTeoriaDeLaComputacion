@@ -112,17 +112,17 @@
   50%      { filter: drop-shadow(0 0 10px var(--c-blood)) brightness(2); }
 }
 
-/* --- Misil perseguidor --- */
+/* --- Misil perseguidor 
 .missile {
   width: 18px;
   height: 18px;
-  border-radius: 50% 50% 50% 0;     /* gota / proyectil */
+  border-radius: 50% 50% 50% 0;    //  gota / proyectil 
   background: radial-gradient(circle at 40% 40%, #fff, var(--c-toxic));
   box-shadow: 0 0 8px var(--c-toxic), 0 0 20px var(--c-blood);
   animation: neon-pulse 600ms infinite;
 }
 .missile.is-armed   { box-shadow: var(--glow-blood); }
-
+ */
 /* ===================== ELEMENTOS FLOTANTES / SALPICADURAS ===================== */
 .floating-layer {
   position: absolute;

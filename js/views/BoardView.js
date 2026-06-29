@@ -12,7 +12,7 @@ export class BoardView {
     this.el = {
       p1: document.getElementById('player1'),
       p2: document.getElementById('player2'),
-      missile: document.getElementById('missile'),
+      //missile: document.getElementById('missile'),
       floating: document.getElementById('floating-layer'),
     };
     this.zoneEls = [
@@ -56,12 +56,12 @@ export class BoardView {
 
     this._place(this.el.p1, state.player1);
     this._place(this.el.p2, state.player2);
-    this._place(this.el.missile, state.missile);
+    //this._place(this.el.missile, state.missile);
 
     // Estados: muerte
     this.el.p1.classList.toggle('is-dead', !state.player1.alive);
     this.el.p2.classList.toggle('is-dead', !state.player2.alive);
-    this.el.missile.classList.toggle('is-armed', state.missile.active);
+    //this.el.missile.classList.toggle('is-armed', state.missile.active);
 
     // Estados: escudo / invulnerabilidad (parpadeo i-frames)
     this.el.p1.classList.toggle('is-shield', state.player1.alive && state.player1.isInvulnerable(now));
