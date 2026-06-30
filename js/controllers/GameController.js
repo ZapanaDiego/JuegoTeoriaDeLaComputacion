@@ -37,18 +37,17 @@ export class GameController {
   }
 
   /** FUNCIÓN AUXILIAR: Devuelve a los jugadores de forma segura a sus esquinas de origen */
-  _resetPlayerPositions() {
+_resetPlayerPositions() {
+    const centerX = this.state.bounds.w / 2;
+    const centerY = this.state.bounds.h / 2;
+
     if (this.state.player1) {
-      this.state.player1.x = 80;   // Coordenada inicial izquierda
-      this.state.player1.y = 350;  // Centrado verticalmente
+      this.state.player1.x = centerX - 40;  
+      this.state.player1.y = centerY - 17;  
     }
     if (this.state.player2) {
-      this.state.player2.x = 1100; // Coordenada inicial derecha
-      this.state.player2.y = 350;  // Centrado verticalmente
-    }
-    if (this.state.missile) {
-      this.state.missile.x = 600;
-      this.state.missile.y = 350;
+      this.state.player2.x = centerX + 10; 
+      this.state.player2.y = centerY - 17; 
     }
   }
 
@@ -62,15 +61,23 @@ export class GameController {
     
     // 1. Teletransportar jugadores al spawn inicial de la partida
     this._resetPlayerPositions();
-    if (this.state.player1) { this.state.player1.alive = true; this.state.player1.lives = 3; }
-    if (this.state.player2) { this.state.player2.alive = true; this.state.player2.lives = 3; }
-    if (this.state.missile) { this.state.missile.active = true; }
+    {
+    const centerX = this.state.bounds.w / 2;
+    const centerY = this.state.bounds.h / 2;
 
-    // 2. Limpieza total de estilos visuales anteriores
-    const zonesElements = document.querySelectorAll('.answer-zone');
-    zonesElements.forEach(zoneElement => {
-      zoneElement.classList.remove('is-correct', 'is-wrong');
-    });
+    if (this.state.player1) {
+      this.state.player1.x = centerX - 40; 
+      this.state.player1.y = centerY - 17;
+      this.state.player1.vx = 0; this.state.player1.vy = 0;
+    }
+    if (this.state.player2) {
+      this.state.player2.x = centerX + 10;
+      this.state.player2.y = centerY - 17;
+      this.state.player2.vx = 0; this.state.player2.vy = 0;
+    }
+  }
+
+
 
     this.state.players.forEach(p => {
       p.hasAnswered = false;
