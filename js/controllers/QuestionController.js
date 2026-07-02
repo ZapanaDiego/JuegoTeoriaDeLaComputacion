@@ -5,6 +5,8 @@
    zona en la que se posicione un jugador.
    ============================================================ */
 
+import { DebugLogger } from '../modules/debug.js';
+
 export class QuestionController {
   /**
    * @param {QuestionModel} model
@@ -16,11 +18,13 @@ export class QuestionController {
   }
 
   async init() {
+    DebugLogger.logTrace('QuestionController', 'init', 'Inicializando controlador de preguntas');
     await this.model.load();
   }
 
   /** Sirve y muestra una nueva pregunta. */
   nextQuestion() {
+    DebugLogger.logTrace('QuestionController', 'nextQuestion', 'Solicitando nueva pregunta a la vista');
     const q = this.model.next();
     this.view.clearZones();
     this.view.show(q);
@@ -32,6 +36,7 @@ export class QuestionController {
    * @returns {boolean} si fue correcta. La vista resalta la zona.
    */
   resolve(zoneIndex) {
+    DebugLogger.logTrace('QuestionController', 'resolve', `Resolviendo respuesta en zona ${zoneIndex}`);
     const correct = this.model.isCorrect(zoneIndex);
     this.view.flashZone(zoneIndex, correct);
     return correct;

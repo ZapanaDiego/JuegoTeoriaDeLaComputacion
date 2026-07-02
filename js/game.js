@@ -50,6 +50,7 @@ async function bootstrap() {
   /* ---------- 4) ENTRADA: ENTER inicia / reinicia ---------- */
   inputCtrl.init({
     onStart: () => {
+      // Permite iniciar desde START (primera vez) o GAMEOVER (revancha)
       if (state.phase === Phase.START || state.phase === Phase.GAMEOVER) {
         game.startGame();
       }

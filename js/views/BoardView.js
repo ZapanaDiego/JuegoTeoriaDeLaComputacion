@@ -44,10 +44,42 @@ export class BoardView {
     });
   }
 
+  /**
+   * Inicializa y renderiza los obstáculos en el DOM.
+   * Limpia obstáculos anteriores si existen.
+   */
+  initObstacles(obstacles) {
+    // 1. Limpiar obstáculos anteriores
+    const oldObstacles = this.board.querySelectorAll('.obstacle');
+    oldObstacles.forEach(obs => obs.remove());
+
+    if (!obstacles) return;
+
+    // 2. Iterar sobre el array y crear elementos div
+    obstacles.forEach(obs => {
+      const el = document.createElement('div');
+      el.className = `obstacle obstacle--${obs.type}`;
+      
+      // 3. Posicionarlos absolutamente (Redondeo para evitar glitches de renderizado sub-pixel)
+      el.style.left = `${Math.floor(obs.x)}px`;
+      el.style.top = `${Math.floor(obs.y)}px`;
+      el.style.width = `${Math.floor(obs.w)}px`;
+      el.style.height = `${Math.floor(obs.h)}px`;
+      
+      // Inyectar en el tablero principal
+      this.board.appendChild(el);
+    });
+  }
+
   /** Posiciona una entidad (absolute) según su modelo {x,y}. */
   _place(el, entity) {
     el.style.left = `${entity.x}px`;
     el.style.top = `${entity.y}px`;
+  }
+
+  /** Limpia visualmente los estados correct/wrong de las zonas de respuesta. */
+  resetZones() {
+    this.zoneEls.forEach(el => el.classList.remove('is-correct', 'is-wrong'));
   }
 
   /** Render principal por frame. */

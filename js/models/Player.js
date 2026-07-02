@@ -7,20 +7,23 @@
 export class Player {
   /**
    * @param {string} id        Identificador ('p1' | 'p2').
-   * @param {object} opts       {x, y, w, h, speed, lives}
+   * @param {object} opts       {x, y, w, h, speed, lives, name}
    */
   constructor(id, opts = {}) {
     this.id = id;
+    this.name = opts.name || (id === 'p1' ? 'Jugador 1' : 'Jugador 2');
     this.x = opts.x ?? 0;
     this.y = opts.y ?? 0;
     this.w = opts.w ?? 34;
     this.h = opts.h ?? 34;
-    this.speed = opts.speed ?? 220;     // px/segundo
+    this.speed = opts.speed ?? 260;     // px/segundo (aumentado por mayor densidad de obstáculos)
     this.lives = opts.lives ?? 3;
     this.invulnerableUntil = 0;          // timestamp (ms) para i-frames tras recibir daño
     this.alive = true;
-    this.hasAnswered = false;
+    this.hasResponded = false;
     this.score = 0;                      // sistema de puntos
+    this.correctAnswers = 0;             // aciertos en esta partida
+    this.incorrectAnswers = 0;           // errores en esta partida
     this.insideZoneIndex = -1;           // zona actual en la que está colisionando (-1 si ninguna)
   }
 
@@ -63,5 +66,19 @@ export class Player {
     // Activar i-frames automáticamente tras el golpe
     this.makeInvulnerable(now);
     return this.lives;
+  }
+
+  /**
+   * Reinicia estadísticas de partida (preserva el nombre del jugador).
+   */
+  resetStats() {
+    this.lives = 3;
+    this.alive = true;
+    this.score = 0;
+    this.correctAnswers = 0;
+    this.incorrectAnswers = 0;
+    this.hasResponded = false;
+    this.insideZoneIndex = -1;
+    this.invulnerableUntil = 0;
   }
 }

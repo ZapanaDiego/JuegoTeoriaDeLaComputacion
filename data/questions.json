@@ -1,8 +1,8 @@
 {
   "meta": {
     "title": "TC-Survival — Banco de preguntas",
-    "version": "1.0.0",
-    "description": "Preguntas de Teoría de la Computación. Cada pregunta tiene 4 respuestas mapeadas a las 4 esquinas del tablero (zonas de respuesta).",
+    "version": "2.0.0",
+    "description": "Preguntas de Teoría de la Computación. Cada pregunta tiene 4 respuestas mapeadas a las 4 esquinas del tablero (zonas de respuesta). isCorrect: 1 = correcta, 0 = incorrecta.",
     "zoneMap": {
       "0": "zone-top-left",
       "1": "zone-top-right",
@@ -12,108 +12,485 @@
   },
   "questions": [
     {
-      "id": "afd-001",
-      "topic": "AFD",
+      "id": "tema-001",
+      "topic": "Jerarquía de Chomsky",
       "difficulty": 1,
-      "text": "¿Qué característica define a un Autómata Finito Determinista (AFD)?",
+      "text": "Según la Jerarquía de Chomsky, ¿qué tipo de lenguaje es generado por las gramáticas regulares y reconocido por los autómatas finitos?",
       "answers": [
-        "Cada estado tiene exactamente una transición por cada símbolo del alfabeto",
-        "Permite transiciones vacías (epsilon)",
-        "Puede tener varias transiciones para el mismo símbolo",
-        "Usa una pila auxiliar para decidir"
-      ],
-      "correctIndex": 0
+        { "text": "Lenguajes de Tipo 1 (Sensibles al contexto)", "isCorrect": 0 },
+        { "text": "Lenguajes de Tipo 2 (Libres de contexto)", "isCorrect": 0 },
+        { "text": "Lenguajes de Tipo 3 (Regulares)", "isCorrect": 1 },
+        { "text": "Lenguajes de Tipo 0 (Recursivamente enumerables)", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "afnd-001",
-      "topic": "AFND",
+      "id": "tema-002",
+      "topic": "Conceptos básicos de autómatas",
+      "difficulty": 1,
+      "text": "Formalmente, un Autómata Finito Determinista (AFD) se define como una tupla de 5 elementos: (Q, Σ, δ, q0, F). ¿Qué representa el elemento 'F'?",
+      "answers": [
+        { "text": "La función de transición que define los cambios de estado.", "isCorrect": 0 },
+        { "text": "El conjunto de estados de aceptación o finales, que es un subconjunto de Q.", "isCorrect": 1 },
+        { "text": "El estado inicial del autómata, que debe ser único.", "isCorrect": 0 },
+        { "text": "El alfabeto de entrada que la máquina puede procesar.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-003",
+      "topic": "Autómatas Finitos Deterministas (AFD)",
       "difficulty": 2,
-      "text": "¿Qué puede tener un AFND que un AFD no?",
+      "text": "¿Cuál es la característica fundamental que hace que un autómata finito sea 'Determinista' (AFD)?",
       "answers": [
-        "Más de un estado final",
-        "Transiciones epsilon y múltiples transiciones por símbolo",
-        "Un alfabeto infinito",
-        "Memoria ilimitada de cinta"
-      ],
-      "correctIndex": 1
+        { "text": "Para cada estado y cada símbolo del alfabeto, existe exactamente una transición posible.", "isCorrect": 1 },
+        { "text": "Permite transiciones vacías (épsilon) para cambiar de estado sin leer símbolos.", "isCorrect": 0 },
+        { "text": "Siempre terminará su ejecución en un estado de aceptación si la cadena es finita.", "isCorrect": 0 },
+        { "text": "Puede tener múltiples estados iniciales para procesar diferentes patrones en paralelo.", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "regex-001",
+      "id": "tema-004",
+      "topic": "Jerarquía de Chomsky",
+      "difficulty": 2,
+      "text": "Considerando la inclusión estricta en la Jerarquía de Chomsky, ¿cuál de las siguientes afirmaciones es correcta?",
+      "answers": [
+        { "text": "Todo lenguaje libre de contexto es también un lenguaje regular.", "isCorrect": 0 },
+        { "text": "La intersección de la clase Tipo 0 y Tipo 3 resulta en lenguajes sensibles al contexto.", "isCorrect": 0 },
+        { "text": "Todo lenguaje regular es obligatoriamente un lenguaje libre de contexto.", "isCorrect": 1 },
+        { "text": "Los lenguajes regulares son los más potentes computacionalmente hablando.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-005",
+      "topic": "Autómatas Finitos Deterministas (AFD)",
+      "difficulty": 2,
+      "text": "¿Cuál es el número mínimo de estados necesarios en un AFD para reconocer el lenguaje sobre el alfabeto {0, 1} formado por todas las cadenas que terminan en '11'?",
+      "answers": [
+        { "text": "2 estados", "isCorrect": 0 },
+        { "text": "4 estados", "isCorrect": 0 },
+        { "text": "1 estado", "isCorrect": 0 },
+        { "text": "3 estados", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-006",
+      "topic": "Conceptos básicos de autómatas",
+      "difficulty": 1,
+      "text": "En el contexto de lenguajes formales, ¿cuál es la diferencia entre el lenguaje vacío (∅) y el lenguaje que solo contiene la cadena vacía ({ε})?",
+      "answers": [
+        { "text": "∅ no tiene cadenas (cardinalidad 0), mientras que {ε} contiene exactamente una cadena de longitud cero (cardinalidad 1).", "isCorrect": 1 },
+        { "text": "No hay diferencia, ambos representan el mismo concepto matemático en la teoría de la computación.", "isCorrect": 0 },
+        { "text": "∅ requiere estados finales en el autómata, pero {ε} se acepta sin necesidad de estados finales.", "isCorrect": 0 },
+        { "text": "{ε} es un símbolo válido del alfabeto, mientras que ∅ es una cadena.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-007",
+      "topic": "Autómatas Finitos Deterministas (AFD)",
+      "difficulty": 2,
+      "text": "La firma de la función de transición (δ) en un Autómata Finito Determinista está matemáticamente definida como:",
+      "answers": [
+        { "text": "δ: Q × (Σ ∪ {ε}) → Q", "isCorrect": 0 },
+        { "text": "δ: Q × Σ → P(Q) (Conjunto potencia de Q)", "isCorrect": 0 },
+        { "text": "δ: Q × Σ → Q", "isCorrect": 1 },
+        { "text": "δ: P(Q) × Σ → Q", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-008",
+      "topic": "Conceptos básicos de autómatas",
+      "difficulty": 3,
+      "text": "Si se tiene un AFD 'M' que reconoce un lenguaje regular 'L', ¿cómo se construye un AFD que reconozca el complemento de 'L'?",
+      "answers": [
+        { "text": "Es imposible garantizar que el complemento sea regular sin evaluar la expresión regular.", "isCorrect": 0 },
+        { "text": "Intercambiando los estados de aceptación por los estados de rechazo (no finales) y viceversa.", "isCorrect": 1 },
+        { "text": "Inviertiendo la dirección de todas las transiciones (flechas) del autómata original.", "isCorrect": 0 },
+        { "text": "Agregando un nuevo estado sumidero (trampa) conectado al estado inicial.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-009",
+      "topic": "Autómatas Finitos Deterministas (AFD)",
+      "difficulty": 2,
+      "text": "En un AFD diseñado para aceptar cadenas de paridad par (número par de 1s y número par de 0s), ¿cuántos estados son estrictamente necesarios para modelar las clases de equivalencia de este problema?",
+      "answers": [
+        { "text": "2 estados (uno para paridad par y otro para impar).", "isCorrect": 0 },
+        { "text": "3 estados.", "isCorrect": 0 },
+        { "text": "4 estados.", "isCorrect": 1 },
+        { "text": "8 estados.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-010",
+      "topic": "Conceptos básicos de autómatas",
+      "difficulty": 1,
+      "text": "¿Qué ocurre si una cadena es procesada por completo en un AFD y la máquina se detiene en un estado que NO pertenece al conjunto F (estados finales)?",
+      "answers": [
+        { "text": "La máquina se bloquea y lanza una excepción de sintaxis.", "isCorrect": 0 },
+        { "text": "La cadena de entrada se considera aceptada de manera parcial.", "isCorrect": 0 },
+        { "text": "La máquina reinicia el procesamiento leyendo la cadena en reversa.", "isCorrect": 0 },
+        { "text": "La cadena de entrada es rechazada por el autómata.", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-011",
+      "topic": "Autómatas Finitos No Deterministas (AFND)",
+      "difficulty": 1,
+      "text": "¿Qué característica distingue principalmente a un Autómata Finito No Determinista (AFND) frente a un AFD?",
+      "answers": [
+        { "text": "El AFND no tiene estado inicial definido formalmente.", "isCorrect": 0 },
+        { "text": "El AFND carece de estados finales y usa una cinta auxiliar.", "isCorrect": 0 },
+        { "text": "El AFND permite cero, una o múltiples transiciones para un mismo símbolo de entrada desde un estado.", "isCorrect": 1 },
+        { "text": "El AFND puede leer múltiples símbolos del alfabeto al mismo tiempo.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-012",
+      "topic": "Equivalencias y transformaciones AFD/AFND",
+      "difficulty": 2,
+      "text": "Respecto a la capacidad de cómputo (o poder de reconocimiento) de los autómatas finitos, ¿cuál de las siguientes afirmaciones es matemáticamente cierta?",
+      "answers": [
+        { "text": "Los AFND son más potentes que los AFD porque utilizan paralelismo y no determinismo.", "isCorrect": 0 },
+        { "text": "Los AFD y los AFND son equivalentes en poder; reconocen exactamente la misma familia de lenguajes.", "isCorrect": 1 },
+        { "text": "Los AFD son más potentes porque no sufren de ambigüedad en sus caminos de transición.", "isCorrect": 0 },
+        { "text": "Los AFND con transiciones épsilon (AFND-ε) son más potentes que los AFND tradicionales.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-013",
+      "topic": "Autómatas Finitos No Deterministas (AFND)",
+      "difficulty": 2,
+      "text": "En la definición formal de un AFND, la función de transición δ se define como δ: Q × (Σ ∪ {ε}) → P(Q). ¿Qué implica mapear hacia P(Q) (el conjunto potencia)?",
+      "answers": [
+        { "text": "Que la máquina puede dividir su cálculo transicionando a un conjunto (múltiples) estados simultáneamente.", "isCorrect": 1 },
+        { "text": "Que la máquina debe escoger probabilísticamente el camino de mayor peso.", "isCorrect": 0 },
+        { "text": "Que la cantidad de transiciones posibles decrece exponencialmente.", "isCorrect": 0 },
+        { "text": "Que el alfabeto debe estar compuesto por subconjuntos matemáticos.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-014",
+      "topic": "Equivalencias y transformaciones AFD/AFND",
+      "difficulty": 3,
+      "text": "Al aplicar el algoritmo de Construcción de Subconjuntos para transformar un AFND de 'n' estados en un AFD equivalente, ¿cuántos estados tendrá el AFD resultante en el peor de los casos?",
+      "answers": [
+        { "text": "n! (factorial de n)", "isCorrect": 0 },
+        { "text": "2^n (2 elevado a n)", "isCorrect": 1 },
+        { "text": "n^2 (n al cuadrado)", "isCorrect": 0 },
+        { "text": "Exactamente n estados, solo se eliminan las transiciones vacías", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-015",
+      "topic": "Equivalencias y transformaciones AFD/AFND",
+      "difficulty": 2,
+      "text": "¿Qué describe el concepto de 'Clausura Épsilon' (ε-clausura) de un estado 'q' en un AFND-ε?",
+      "answers": [
+        { "text": "La eliminación permanente de todas las transiciones vacías del autómata.", "isCorrect": 0 },
+        { "text": "El conjunto de todos los estados que pueden ser alcanzados desde 'q' siguiendo únicamente transiciones épsilon (incluyéndose a sí mismo).", "isCorrect": 1 },
+        { "text": "Un algoritmo para minimizar el número de estados en el autómata.", "isCorrect": 0 },
+        { "text": "La secuencia más corta de símbolos del alfabeto que lleva a un estado de aceptación.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-016",
       "topic": "Expresiones Regulares",
       "difficulty": 1,
-      "text": "La expresión regular (a|b)* describe...",
+      "text": "¿Qué operación NO está definida en el álgebra fundamental de las Expresiones Regulares?",
       "answers": [
-        "Solo la cadena vacía",
-        "Cadenas con exactamente una 'a' y una 'b'",
-        "Toda cadena formada por 'a' y 'b', incluida la vacía",
-        "Cadenas que terminan en 'ab'"
-      ],
-      "correctIndex": 2
+        { "text": "Intersección y resta", "isCorrect": 1 },
+        { "text": "Unión (a veces representada con + o |)", "isCorrect": 0 },
+        { "text": "Concatenación", "isCorrect": 0 },
+        { "text": "Clausura de Kleene o Estrella (*)", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "glc-001",
-      "topic": "Gramáticas Libres de Contexto",
-      "difficulty": 2,
-      "text": "¿Qué forma tienen las producciones de una Gramática Libre de Contexto?",
-      "answers": [
-        "α → β con α y β cadenas cualesquiera",
-        "A → α donde A es un único no terminal",
-        "Solo A → aB (lineales por la derecha)",
-        "No permiten símbolos terminales"
-      ],
-      "correctIndex": 1
-    },
-    {
-      "id": "pda-001",
-      "topic": "Autómatas de Pila",
+      "id": "tema-017",
+      "topic": "Lema del Bombeo",
       "difficulty": 3,
-      "text": "¿Qué recurso adicional distingue a un Autómata de Pila de un autómata finito?",
+      "text": "El 'Lema del Bombeo' (Pumping Lemma) para lenguajes regulares se utiliza fundamentalmente en Teoría de la Computación para:",
       "answers": [
-        "Una cinta infinita de lectura/escritura",
-        "Un registro de estados cuántico",
-        "Una pila (stack) como memoria auxiliar",
-        "Un oráculo de decisión"
-      ],
-      "correctIndex": 2
+        { "text": "Construir de manera automática el AFD mínimo de un lenguaje.", "isCorrect": 0 },
+        { "text": "Demostrar matemáticamente por contradicción que un lenguaje específico NO es regular.", "isCorrect": 1 },
+        { "text": "Probar de manera contundente que un lenguaje SÍ es regular y hallar su expresión regular.", "isCorrect": 0 },
+        { "text": "Convertir una Gramática Libre de Contexto en un Autómata Finito Determinista.", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "tm-001",
-      "topic": "Máquinas de Turing",
+      "id": "tema-018",
+      "topic": "Lema del Bombeo",
       "difficulty": 3,
-      "text": "¿Qué hace única a una Máquina de Turing frente a un Autómata de Pila?",
+      "text": "Según las condiciones matemáticas del Lema del Bombeo (w = xyz), si un lenguaje L es regular, existe una longitud de bombeo 'p' tal que toda cadena 'w' mayor o igual a 'p' cumple tres condiciones. ¿Cuál de las siguientes ES una de esas condiciones?",
       "answers": [
-        "Puede leer y escribir en una cinta infinita moviéndose en ambos sentidos",
-        "Solo puede aceptar lenguajes regulares",
-        "No tiene estados de aceptación",
-        "Carece de cualquier tipo de memoria"
-      ],
-      "correctIndex": 0
+        { "text": "|xy| ≤ p (La longitud del prefijo xy no debe superar la constante de bombeo).", "isCorrect": 1 },
+        { "text": "|x| > 0 (La subcadena inicial x no puede estar vacía).", "isCorrect": 0 },
+        { "text": "y = ε (La parte que se bombea debe ser estrictamente la cadena vacía).", "isCorrect": 0 },
+        { "text": "x y z deben tener exactamente la misma longitud.", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "regex-002",
+      "id": "tema-019",
       "topic": "Expresiones Regulares",
       "difficulty": 2,
-      "text": "¿Cuál de estos lenguajes NO es regular?",
+      "text": "¿Qué expresión regular describe el lenguaje sobre el alfabeto {a, b} compuesto por todas las cadenas que inician con 'a' y finalizan con 'b'?",
       "answers": [
-        "Cadenas que terminan en '01'",
-        "{ aⁿbⁿ | n ≥ 0 }",
-        "Cadenas de longitud par",
-        "Cadenas que contienen 'aa'"
-      ],
-      "correctIndex": 1
+        { "text": "a(ab)*b", "isCorrect": 0 },
+        { "text": "a(a+b)*b", "isCorrect": 1 },
+        { "text": "(a+b)*ab", "isCorrect": 0 },
+        { "text": "a*(a+b)*b*", "isCorrect": 0 }
+      ]
     },
     {
-      "id": "glc-002",
-      "topic": "Gramáticas Libres de Contexto",
+      "id": "tema-020",
+      "topic": "Lema del Bombeo",
       "difficulty": 3,
-      "text": "El lenguaje { aⁿbⁿ | n ≥ 0 } puede ser generado por...",
+      "text": "Al intentar usar el Lema del Bombeo para demostrar que el lenguaje clásico L = {a^n b^n | n ≥ 0} NO es regular, un paso crucial es seleccionar la cadena w = a^p b^p. Como sabemos que |xy| ≤ p, ¿qué conclusión forzada sacamos sobre la subcadena 'y' que será bombeada (y^i)?",
       "answers": [
-        "Una expresión regular",
-        "Un AFD",
-        "Una Gramática Libre de Contexto",
-        "Ningún formalismo conocido"
-      ],
-      "correctIndex": 2
+        { "text": "La subcadena 'y' debe contener una mezcla exacta de la misma cantidad de a's y b's.", "isCorrect": 0 },
+        { "text": "La subcadena 'y' solo puede contener letras 'b' ignorando la primera mitad de la cadena.", "isCorrect": 0 },
+        { "text": "La subcadena 'y' es la cadena completa, lo que viola la primera regla del lema.", "isCorrect": 0 },
+        { "text": "La subcadena 'y' se compone única y exclusivamente de símbolos 'a', por lo que al bombearla (i>1), la cadena pierde el balance entre 'a' y 'b'.", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-021",
+      "topic": "Gramáticas Libres de Contexto",
+      "difficulty": 1,
+      "text": "¿Qué caracteriza a las reglas de producción de una Gramática Libre de Contexto (GLC) en su forma general?",
+      "answers": [
+        { "text": "α → β, donde la longitud de α es menor o igual a la de β.", "isCorrect": 0 },
+        { "text": "A → α, donde A es un único símbolo no terminal y α es una cadena de terminales y/o no terminales.", "isCorrect": 1 },
+        { "text": "A → aB o A → a, donde A, B son no terminales y a es un símbolo terminal.", "isCorrect": 0 },
+        { "text": "α → β, sin restricciones en los símbolos del lado izquierdo o derecho.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-022",
+      "topic": "Ambigüedad y árboles de derivación",
+      "difficulty": 2,
+      "text": "Una Gramática Libre de Contexto se considera ambigua si:",
+      "answers": [
+        { "text": "Genera un lenguaje que también puede ser reconocido por un Autómata Finito Determinista.", "isCorrect": 0 },
+        { "text": "Contiene producciones vacías (épsilon) en sus reglas.", "isCorrect": 0 },
+        { "text": "Existe al menos una cadena en el lenguaje generado que tiene más de un árbol de derivación distinto.", "isCorrect": 1 },
+        { "text": "Para cada cadena generada, existen múltiples derivaciones por la derecha pero un solo árbol estructural.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-023",
+      "topic": "Forma Normal de Chomsky",
+      "difficulty": 2,
+      "text": "Para que una Gramática Libre de Contexto esté estrictamente en Forma Normal de Chomsky (FNC), todas sus producciones deben tener una de dos formas específicas. ¿Cuáles son?",
+      "answers": [
+        { "text": "A → BC (dos no terminales) o A → a (un terminal).", "isCorrect": 1 },
+        { "text": "A → aB (terminal seguido de no terminal) o A → a (un terminal).", "isCorrect": 0 },
+        { "text": "A → a (un terminal) o A → ε (cadena vacía).", "isCorrect": 0 },
+        { "text": "A → aBC (un terminal y dos no terminales) o A → ε.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-024",
+      "topic": "Autómata de Pila",
+      "difficulty": 1,
+      "text": "Un Autómata de Pila (PDA) extiende las capacidades de cómputo de un Autómata Finito tradicional al incorporar:",
+      "answers": [
+        { "text": "Una cinta infinita de lectura y escritura.", "isCorrect": 0 },
+        { "text": "Dos cintas bidireccionales independientes.", "isCorrect": 0 },
+        { "text": "Una memoria tipo FIFO (First In, First Out) de tamaño dinámico.", "isCorrect": 0 },
+        { "text": "Una memoria auxiliar de tipo LIFO (Last In, First Out).", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-025",
+      "topic": "Autómata de Pila",
+      "difficulty": 2,
+      "text": "Existen dos mecanismos estándar mediante los cuales un Autómata de Pila puede aceptar una cadena de entrada. ¿Cuáles son?",
+      "answers": [
+        { "text": "Por cadena vacía o por transición determinista.", "isCorrect": 0 },
+        { "text": "Por estado final o por pila vacía.", "isCorrect": 1 },
+        { "text": "Por estado de aceptación o por cinta vacía.", "isCorrect": 0 },
+        { "text": "Por lectura completa del alfabeto o por rechazo en estados sumideros.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-026",
+      "topic": "Autómata de Pila",
+      "difficulty": 3,
+      "text": "A diferencia de los Autómatas Finitos, ¿qué ocurre con el determinismo en los Autómatas de Pila (PDA)?",
+      "answers": [
+        { "text": "Todo PDA puede ser convertido a un PDA determinista equivalente mediante el algoritmo de subconjuntos.", "isCorrect": 0 },
+        { "text": "Los PDA deterministas y no deterministas son 100% equivalentes en su poder computacional.", "isCorrect": 0 },
+        { "text": "Los PDA deterministas reconocen lenguajes como {a^n b^n c^n} pero los no deterministas no.", "isCorrect": 0 },
+        { "text": "Los PDA no deterministas reconocen una familia estrictamente mayor de lenguajes que los PDA deterministas.", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-027",
+      "topic": "Lenguajes libres de contexto",
+      "difficulty": 3,
+      "text": "En el Lema del Bombeo para lenguajes libres de contexto, una cadena 'w' se divide en cinco partes (w = uvxyz). ¿Cuál es la condición fundamental que debe cumplirse al bombear?",
+      "answers": [
+        { "text": "Las subcadenas 'v' e 'y' se repiten simultáneamente la misma cantidad de veces (uv^i x y^i z).", "isCorrect": 1 },
+        { "text": "Solo la subcadena central 'x' puede ser bombeada (u v x^i y z).", "isCorrect": 0 },
+        { "text": "La longitud del núcleo vxy debe ser mayor a la constante de bombeo 'p'.", "isCorrect": 0 },
+        { "text": "Las subcadenas 'u' y 'z' deben estar vacías obligatoriamente para iniciar el bombeo.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-028",
+      "topic": "Ambigüedad y árboles de derivación",
+      "difficulty": 2,
+      "text": "Al construir un árbol de derivación para una cadena generada por una GLC, ¿qué elementos conforman siempre las hojas (nodos hoja) del árbol leídas de izquierda a derecha?",
+      "answers": [
+        { "text": "Exclusivamente los símbolos no terminales de la gramática generadora.", "isCorrect": 0 },
+        { "text": "Las reglas de producción matemáticas utilizadas en cada derivación.", "isCorrect": 0 },
+        { "text": "Los símbolos de la cadena generada (alfabeto terminal o épsilon).", "isCorrect": 1 },
+        { "text": "El símbolo inicial de la gramática (axioma) distribuido iterativamente.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-029",
+      "topic": "Lenguajes libres de contexto",
+      "difficulty": 1,
+      "text": "Según el teorema de Chomsky-Schützenberger, todo lenguaje generado por una Gramática Libre de Contexto puede ser reconocido nativamente por:",
+      "answers": [
+        { "text": "Un Autómata de Pila Determinista.", "isCorrect": 0 },
+        { "text": "Un Autómata Finito Determinista con dos cabezales.", "isCorrect": 0 },
+        { "text": "Un Autómata de Pila No Determinista.", "isCorrect": 1 },
+        { "text": "Una Máquina de Turing de una sola cinta estática.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-030",
+      "topic": "Tipos de Máquinas de Turing",
+      "difficulty": 1,
+      "text": "El modelo básico de una Máquina de Turing se caracteriza por poseer una cabeza de lectura/escritura que opera sobre:",
+      "answers": [
+        { "text": "Una cinta infinita dividida en celdas por la que puede moverse hacia la izquierda o hacia la derecha libremente.", "isCorrect": 1 },
+        { "text": "Una memoria RAM de tamaño dinámico con punteros aleatorios a cualquier dirección.", "isCorrect": 0 },
+        { "text": "Dos pilas LIFO (Last In, First Out) conectadas en paralelo.", "isCorrect": 0 },
+        { "text": "Una cinta finita unidireccional que estrictamente solo permite avanzar hacia la derecha.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-031",
+      "topic": "Tipos de Máquinas de Turing",
+      "difficulty": 2,
+      "text": "Si comparamos una Máquina de Turing estándar (de una sola cinta) con una Máquina de Turing Multicinta, ¿qué podemos afirmar matemáticamente sobre su poder computacional?",
+      "answers": [
+        { "text": "La versión Multicinta es estrictamente más poderosa y puede resolver el Problema de la Parada.", "isCorrect": 0 },
+        { "text": "Ambas son equivalentes; reconocen y deciden exactamente la misma familia de lenguajes.", "isCorrect": 1 },
+        { "text": "La estándar solo puede reconocer lenguajes regulares y libres de contexto sin ambigüedad.", "isCorrect": 0 },
+        { "text": "La Multicinta pierde la capacidad de simulación cruzada si se utilizan más de 3 cintas.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-032",
+      "topic": "Lenguajes reconocibles y decidibles",
+      "difficulty": 3,
+      "text": "Un lenguaje formal 'L' es clasificado como Turing-decidible (o lenguaje recursivo) si y solo si:",
+      "answers": [
+        { "text": "Existe una Máquina de Turing que se detiene aceptando las cadenas de L, pero puede quedar en bucle infinito si la cadena no pertenece a L.", "isCorrect": 0 },
+        { "text": "Su gramática libre de contexto generadora carece de recursividad por la izquierda y factoriza a la derecha.", "isCorrect": 0 },
+        { "text": "Existe una Máquina de Turing que lo reconoce y que SIEMPRE se detiene en tiempo finito, aceptando o rechazando cualquier cadena de entrada.", "isCorrect": 1 },
+        { "text": "El lenguaje complemento de L es estrictamente regular o libre de contexto.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-033",
+      "topic": "Lenguajes reconocibles y decidibles",
+      "difficulty": 2,
+      "text": "¿Qué podría ocurrir teóricamente si se ingresa una cadena inválida a una Máquina de Turing que fue diseñada para un lenguaje que es Turing-reconocible pero NO decidible?",
+      "answers": [
+        { "text": "La máquina podría detenerse en estado de rechazo, o bien entrar en un bucle infinito y nunca detenerse.", "isCorrect": 1 },
+        { "text": "La máquina siempre se detendrá y rechazará la cadena en un tiempo polinomial acotado.", "isCorrect": 0 },
+        { "text": "La máquina borrará la cinta completa y aceptará la cadena vacía como un mecanismo de seguridad.", "isCorrect": 0 },
+        { "text": "La máquina lanzará una excepción algorítmica deteniéndose de manera forzada antes del primer paso.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-034",
+      "topic": "Problemas de parada",
+      "difficulty": 3,
+      "text": "El Problema de la Parada (Halting Problem), formulado por Alan Turing, establece un límite computacional demostrando que:",
+      "answers": [
+        { "text": "Todo programa informático, independientemente de su complejidad de bucles, eventualmente terminará su ejecución.", "isCorrect": 0 },
+        { "text": "Es matemáticamente posible construir un depurador universal que detecte infinitos dinámicos en cualquier código fuente.", "isCorrect": 0 },
+        { "text": "No existe ni existirá un algoritmo general capaz de predecir si cualquier programa, dada una entrada, se detendrá o se colgará en un bucle infinito.", "isCorrect": 1 },
+        { "text": "Las Máquinas de Turing carecen de la memoria física necesaria para simular programas modernos de alta concurrencia.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-035",
+      "topic": "Tipos de Máquinas de Turing",
+      "difficulty": 2,
+      "text": "¿Cuál es el propósito o habilidad definitoria de la llamada 'Máquina de Turing Universal' (MTU)?",
+      "answers": [
+        { "text": "Resolver de manera determinista problemas de la clase NP-Completo en tiempo polinomial.", "isCorrect": 0 },
+        { "text": "Recibir la descripción codificada de cualquier otra Máquina de Turing junto a sus datos, y simular paso a paso su ejecución.", "isCorrect": 1 },
+        { "text": "Traducir automáticamente gramáticas libres de contexto complejas hacia autómatas de pila optimizados.", "isCorrect": 0 },
+        { "text": "Poder procesar infinitos símbolos de entrada paralelizándolos en cintas multidimensionales simultáneas.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-036",
+      "topic": "Computabilidad",
+      "difficulty": 2,
+      "text": "La 'Tesis de Church-Turing' es un cimiento teórico de las Ciencias de la Computación empíricamente aceptado que establece que:",
+      "answers": [
+        { "text": "Las computadoras cuánticas podrán eventualmente resolver problemas indecidibles como el Problema de la Parada.", "isCorrect": 0 },
+        { "text": "Los lenguajes libres de contexto representan la frontera máxima absoluta de lo que la humanidad puede computar.", "isCorrect": 0 },
+        { "text": "Existe una jerarquía inabarcable de máquinas abstractas, y las de Turing son apenas el nivel intermedio.", "isCorrect": 0 },
+        { "text": "Todo proceso que los humanos consideramos lógicamente como un 'algoritmo o procedimiento efectivo', puede ser ejecutado por una Máquina de Turing.", "isCorrect": 1 }
+      ]
+    },
+    {
+      "id": "tema-037",
+      "topic": "Computabilidad",
+      "difficulty": 3,
+      "text": "En la teoría de la computabilidad, la poderosa técnica matemática de 'Reducción' (por ejemplo, reducir el problema A al problema B) se utiliza frecuentemente para:",
+      "answers": [
+        { "text": "Transformar un Autómata Finito No Determinista masivo en un AFD minimizado eliminando estados redundantes.", "isCorrect": 0 },
+        { "text": "Demostrar que si B es fácil de resolver, A también lo es; o crucialmente, demostrar que si A es indecidible, entonces B también es indecidible.", "isCorrect": 1 },
+        { "text": "Acortar drásticamente el espacio de memoria que requiere un Autómata de Pila para procesar lenguajes complejos.", "isCorrect": 0 },
+        { "text": "Disminuir la cantidad de símbolos terminales requeridos para que una Máquina de Turing emule a una computadora real.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-038",
+      "topic": "Lenguajes reconocibles y decidibles",
+      "difficulty": 3,
+      "text": "De acuerdo con los teoremas de jerarquía computacional, si un lenguaje 'L' es Turing-reconocible y simultáneamente su lenguaje complemento también es Turing-reconocible, entonces:",
+      "answers": [
+        { "text": "El lenguaje 'L' se degrada y pasa a ser estrictamente sensible al contexto (Tipo 1).", "isCorrect": 0 },
+        { "text": "El lenguaje 'L' es obligatoriamente Turing-decidible (recursivo).", "isCorrect": 1 },
+        { "text": "Ocurre una contradicción lógica; es imposible que un lenguaje y su complemento coexistan en el estado de reconocibilidad.", "isCorrect": 0 },
+        { "text": "El lenguaje 'L' es trivialmente finito y puede ser abstraído en una Expresión Regular.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-039",
+      "topic": "Tipos de Máquinas de Turing",
+      "difficulty": 2,
+      "text": "Una Máquina de Turing No Determinista (MTND) permite explorar múltiples ramas de ejecución simultáneamente. Si la comparamos con una Máquina de Turing Determinista (MTD), la verdad es que:",
+      "answers": [
+        { "text": "La MTND puede decidir lenguajes abstractos indecidibles que la MTD clásica jamás lograría procesar.", "isCorrect": 0 },
+        { "text": "La MTND está condicionada a fallar (crash) si el árbol de ejecución crece más allá del tamaño de su cinta inicial.", "isCorrect": 0 },
+        { "text": "La MTND no añade poder de cómputo sobre los lenguajes; todo lo que reconoce una MTND puede ser reconocido por una MTD.", "isCorrect": 1 },
+        { "text": "La MTND es incapaz de calcular funciones aritméticas básicas (suma, multiplicación), limitándose solo al análisis sintáctico.", "isCorrect": 0 }
+      ]
+    },
+    {
+      "id": "tema-040",
+      "topic": "Problemas de parada",
+      "difficulty": 3,
+      "text": "El Problema de Correspondencia de Post (PCP) es frecuentemente descrito como un rompecabezas de fichas tipo dominó. ¿Cuál es su relevancia teórica central en ciencias de la computación?",
+      "answers": [
+        { "text": "Es un elegante ejemplo de un problema indecidible que no requiere mencionar explícitamente Máquinas de Turing en su formulación.", "isCorrect": 1 },
+        { "text": "Es el primer algoritmo históricamente registrado capaz de decidir la ambigüedad en gramáticas regulares complejas.", "isCorrect": 0 },
+        { "text": "Evidencia de forma contundente que los Autómatas de Pila deterministas sufren inevitablemente de colisiones de memoria LIFO.", "isCorrect": 0 },
+        { "text": "Se utiliza como el fundamento principal para demostrar el Lema del Bombeo en lenguajes libres de contexto bidimensionales.", "isCorrect": 0 }
+      ]
     }
+    
   ]
 }

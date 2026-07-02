@@ -18,10 +18,13 @@ export class QuestionView {
     ];
   }
 
-  /** Renderiza una pregunta: respuestas en zonas (enunciado omitido del panel superior). */
+  /** Renderiza una pregunta: respuestas (objetos {text, isCorrect}) en zonas. */
   show(question) {
     question.answers.forEach((ans, i) => {
-      if (this.zoneTextEls[i]) this.zoneTextEls[i].textContent = ans;
+      if (this.zoneTextEls[i]) {
+        // La respuesta es ahora un objeto { text, isCorrect }
+        this.zoneTextEls[i].textContent = typeof ans === 'object' ? ans.text : ans;
+      }
     });
   }
 

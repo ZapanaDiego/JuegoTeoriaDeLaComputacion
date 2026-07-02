@@ -6,17 +6,23 @@
    ============================================================ */
 
 import { Phase } from '../models/GameState.js';
-import { clampToBounds, aabbIntersects, isInsideZone } from '../modules/collision.js';
+import { clampToBounds, aabbIntersects, isInsideZone, collidesWithAnyObstacle, getCollidingObstacle } from '../modules/collision.js';
+import { DebugLogger } from '../modules/debug.js';
 
 export class GameController {
   constructor({ state, inputCtrl, questionCtrl, boardView, hudView, questionView, audioCtrl}) {
     this.state = state;
     this.input = inputCtrl;
     this.questions = questionCtrl;
-    this.board = boardView;
+    this.boardView = boardView;
     this.hud = hudView;
     this.qView = questionView;
     this.audioCtrl = audioCtrl;
+
+    // Nombres persistentes entre rondas (sobreviven a la revancha)
+    this._p1Name = 'Jugador 1';
+    this._p2Name = 'Jugador 2';
+    this._namesRegistered = false; // false = primera vez, muestra inputs
 
     // Temporizadores internos para el popup
     this._popupTimer = 0;
@@ -28,6 +34,7 @@ export class GameController {
 
   /** Arranque inicial: pintar HUD y dejar listo el overlay de inicio. */
   init() {
+    DebugLogger.logTrace('GameController', 'init', 'Iniciando renderizado inicial (HUD)');
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
     this.hud.renderScore(this.state.player1);
@@ -53,54 +60,70 @@ _resetPlayerPositions() {
 
   /** Comienza / reinicia la partida (lo dispara ENTER). */
   startGame() {
+    DebugLogger.logTrace('GameController', 'startGame', 'Comenzando o reiniciando el juego');
     if (this.state.phase === Phase.PLAYING
         || this.state.phase === Phase.QUESTION_POPUP) return;
 
-    this.state.reset();
-    this.state.phase = Phase.QUESTION_POPUP;   // aún no es PLAYING
-    
-    // 1. Teletransportar jugadores al spawn inicial de la partida
+    const isRematch = this._namesRegistered;
+
+    if (!isRematch) {
+      // === PRIMERA PARTIDA: capturar nombres de los inputs ===
+      const names = this.hud.getPlayerNames();
+      this._p1Name = names.p1 || 'Jugador 1';
+      this._p2Name = names.p2 || 'Jugador 2';
+      this._namesRegistered = true;
+    }
+
+    // Aplicar nombres al modelo (preservados entre revanchas)
+    this.state.player1.name = this._p1Name;
+    this.state.player2.name = this._p2Name;
+
+    if (isRematch) {
+      // === REVANCHA: resetear solo estadísticas, conservar nombres ===
+      this.state.player1.resetStats();
+      this.state.player2.resetStats();
+      // Limpiar DOM de obstáculos viejos
+      this.boardView.resetZones();
+      // Regenerar mapa
+      this.state.generateProceduralObstacles();
+      this.boardView.initObstacles(this.state.obstacles);
+      this.state.timeLeft = this.state.roundTime;
+      this.state.isEvaluatingAnswer = false;
+    } else {
+      // === PRIMERA VEZ: reset total del estado ===
+      this.state.reset();
+      this.boardView.initObstacles(this.state.obstacles);
+    }
+
+    // Ocultar pantalla de inicio (inputs)
+    this.hud.showStart(false);
+    // Ocultar pantalla de gameover si viene de revancha
+    this.hud.showGameover(false);
+
+    // Mostrar nombres en el HUD
+    this.hud.setPlayerNames(this._p1Name, this._p2Name);
+
+    DebugLogger.logPhase(this.state.phase, Phase.QUESTION_POPUP);
+    this.state.phase = Phase.QUESTION_POPUP;
+
+    // Reposicionar jugadores al centro
     this._resetPlayerPositions();
-    {
-    const centerX = this.state.bounds.w / 2;
-    const centerY = this.state.bounds.h / 2;
 
-    if (this.state.player1) {
-      this.state.player1.x = centerX - 40; 
-      this.state.player1.y = centerY - 17;
-      this.state.player1.vx = 0; this.state.player1.vy = 0;
-    }
-    if (this.state.player2) {
-      this.state.player2.x = centerX + 10;
-      this.state.player2.y = centerY - 17;
-      this.state.player2.vx = 0; this.state.player2.vy = 0;
-    }
-  }
-
-
-
+    // Limpiar flags de respuesta
     this.state.players.forEach(p => {
-      p.hasAnswered = false;
+      p.hasResponded = false;
       p.insideZoneIndex = -1;
-      p.score = 0;
-      const playerElement = document.querySelector(`.player--${p.id}`);
-      if (playerElement) {
-        playerElement.classList.remove('is-dead', 'is-hurt');
-      }
+      const el = document.querySelector(`.player--${p.id}`);
+      if (el) el.classList.remove('is-dead', 'is-hurt');
     });
 
-    // 3. Cargar primera pregunta
+    // Cargar primera pregunta
     const q = this.questions.nextQuestion();
     this.hud.showQuestionPopup(q);
-
-    // 4. Mapear zonas físicas del tablero
-    this.state.zones = this.board.readZones();
-
+    this.state.zones = this.boardView.readZones();
     this._popupTimer = this._popupDuration;
 
-    // Actualizar HUD por completo
-    this.hud.showStart(false);
-    this.hud.showGameover(false);
+    // Actualizar HUD completo
     this.hud.renderLives(this.state.player1);
     this.hud.renderLives(this.state.player2);
     this.hud.renderScore(this.state.player1);
@@ -113,6 +136,9 @@ _resetPlayerPositions() {
      UPDATE — avanza la lógica del juego (dt en segundos).
      ======================================================== */
   update(dt) {
+    // Bloquear toda lógica si la partida aún no empezó
+    if (this.state.phase === Phase.START) return;
+
     if (this.state.phase === Phase.QUESTION_POPUP) {
       this._updatePopup(dt);
       return;
@@ -125,7 +151,6 @@ _resetPlayerPositions() {
 
     // Si el temporizador activó el GAMEOVER tras el descuento, cortamos el frame inmediatamente
     if (this.state.phase === Phase.GAMEOVER) return;
-
 
     // Movimiento físico y colisiones (solo si la ronda sigue su curso)
     this._updatePlayers(dt);   
@@ -144,7 +169,7 @@ _resetPlayerPositions() {
       
       // Averiguamos si todos los jugadores activos ya dejaron su respuesta
       const activos = this.state.players.filter(p => p.alive);
-      const todosRespondieron = activos.length > 0 && activos.every(p => p.hasAnswered);
+      const todosRespondieron = activos.length > 0 && activos.every(p => p.hasResponded);
 
       // === CASO A: El tiempo llegó a 0 y los que están vivos ya respondieron ===
       if (todosRespondieron) {
@@ -158,20 +183,30 @@ _resetPlayerPositions() {
       const now = performance.now();
 
       this.state.players.forEach((player) => {
-        if (player.alive && !player.hasAnswered) {
+        if (player.alive && !player.hasResponded) {
           const result = player.loseLife(now);
           if (result === false) return;   // i-frames activos → sin daño
 
-          this.board.flashHurtWithShield(player.id);
+          this.boardView.flashHurtWithShield(player.id);
           this.hud.renderLives(player);
         }
       });
 
-      // CONTROL DE FIN DE JUEGO: Si todos murieron por tiempo agotado
-      if (!this.state.player1.alive && !this.state.player2.alive) {
-        this.state.phase = Phase.GAMEOVER;
-        this.hud.showGameover(true);
-        return; 
+      // CONTROL DE FIN DE JUEGO: Si alguien murió por tiempo agotado
+      const p1 = this.state.player1;
+      const p2 = this.state.player2;
+      if (!p1.alive || !p2.alive) {
+        if (!p1.alive && !p2.alive) {
+          // Empate: ambos muertos → sin ganador claro, usar el de más puntos
+          const winner = p1.score >= p2.score ? p1 : p2;
+          const loser  = winner === p1 ? p2 : p1;
+          this._triggerGameOver(winner, loser);
+        } else {
+          const winner = p1.alive ? p1 : p2;
+          const loser  = p1.alive ? p2 : p1;
+          this._triggerGameOver(winner, loser);
+        }
+        return;
       }
 
       this.state.timeLeft = this.state.roundTime;
@@ -183,36 +218,38 @@ _resetPlayerPositions() {
   // CARGAR SIGUIENTE PREGUNTA (CORREGIDO CON REPOSICIONAMIENTO)
   // --------------------------------------------------------
   _cargarSiguientePregunta() {
+    DebugLogger.logTrace('GameController', '_cargarSiguientePregunta', 'Limpiando estado e inyectando nueva pregunta');
     if (this.state.phase === Phase.GAMEOVER) return;
 
     // === SOLUCIÓN AL DAÑO FANTASMA ===
-    // Devolvemos a los jugadores inmediatamente a sus zonas iniciales de spawn neutrales
-    // ANTES de que comience el escaneo de la nueva pregunta, alejándolos de los paneles.
     this._resetPlayerPositions();
 
     // 1. Apagamos la bandera de respuesta de ambos jugadores y reseteamos zona actual
     this.state.players.forEach(p => {
-      p.hasAnswered = false;
+      p.hasResponded = false;
       p.insideZoneIndex = -1;
     });
 
     // 2. Limpiamos las clases CSS del DOM anteriores (.is-correct y .is-wrong)
-    const zonesElements = document.querySelectorAll('.answer-zone');
-    zonesElements.forEach(zoneElement => {
-      zoneElement.classList.remove('is-correct', 'is-wrong');
-    });
+    this.boardView.resetZones();
 
-    // 3. Solicitamos la nueva pregunta
+    // 3. Regenerar mapa: nuevos obstáculos por cada ronda
+    this.state.generateProceduralObstacles();
+    this.boardView.initObstacles(this.state.obstacles);
+    DebugLogger.logMapGen(`Mapa regenerado para nueva ronda. Total: ${this.state.obstacles.length} obstáculos.`);
+
+    // 4. Solicitamos la nueva pregunta
     const proximaPregunta = this.questions.nextQuestion();
     
-    // 4. Pintamos el popup y actualizamos los textos en el DOM
+    // 5. Pintamos el popup y actualizamos los textos en el DOM
     this.hud.showQuestionPopup(proximaPregunta);
 
-    // 5. Escaneamos las nuevas respuestas físicas
-    this.state.zones = this.board.readZones();
+    // 6. Escaneamos las nuevas respuestas físicas
+    this.state.zones = this.boardView.readZones();
 
-    // 6. Cambiar de fase de forma segura
+    // 7. Cambiar de fase de forma segura
     this._popupTimer = this._popupDuration; // 10 segundos de lectura
+    DebugLogger.logPhase(this.state.phase, Phase.QUESTION_POPUP);
     this.state.phase = Phase.QUESTION_POPUP;
   }
 
@@ -226,6 +263,7 @@ _resetPlayerPositions() {
     if (this._popupTimer <= 0) {
       this.hud.hideQuestionPopup();
       // Transición directa a PLAYING (sin cuenta regresiva)
+      DebugLogger.logPhase(this.state.phase, Phase.PLAYING);
       this.state.phase = Phase.PLAYING;
       this.state.timeLeft = this.state.roundTime;
     }
@@ -236,15 +274,32 @@ _resetPlayerPositions() {
   // --------------------------------------------------------
   _updatePlayers(dt) {
     const bounds = this.state.bounds;
+    const obstacles = this.state.obstacles || [];
 
     for (const player of this.state.players) {
       if (!player.alive) continue;
 
       const axis = player.id === 'p1' ? this.input.axisP1() : this.input.axisP2();
+      
+      // Movimiento y Colisión en el eje X
       player.x += axis.x * player.speed * dt;
-      player.y += axis.y * player.speed * dt;
+      let obsX = getCollidingObstacle(player.box, obstacles);
+      if (obsX) {
+        player.x -= axis.x * player.speed * dt; // Revertir X
+        if (axis.x !== 0) player.x -= Math.sign(axis.x); // Factor de desatascamiento de 1px
+        DebugLogger.logPhysics(`[Sliding] Bloqueo en Eje X para ${player.id}`, { axis: 'X', obstacleId: obsX.id, playerPos: { x: player.x, y: player.y } });
+      }
 
-      // Clamp fluido a los bordes del canvas
+      // Movimiento y Colisión en el eje Y
+      player.y += axis.y * player.speed * dt;
+      let obsY = getCollidingObstacle(player.box, obstacles);
+      if (obsY) {
+        player.y -= axis.y * player.speed * dt; // Revertir Y
+        if (axis.y !== 0) player.y -= Math.sign(axis.y); // Factor de desatascamiento de 1px
+        DebugLogger.logPhysics(`[Sliding] Bloqueo en Eje Y para ${player.id}`, { axis: 'Y', obstacleId: obsY.id, playerPos: { x: player.x, y: player.y } });
+      }
+
+      // Clamp fluido a los bordes externos del canvas
       const clamped = clampToBounds(player.box, bounds);
       player.x = clamped.x;
       player.y = clamped.y;
@@ -294,10 +349,10 @@ _resetPlayerPositions() {
       }
 
       if (collidingZone) {
-        // Evaluar la respuesta si es la primera vez que entra a esta zona
-        if (player.insideZoneIndex !== collidingZone.index) {
+        // Evaluar la respuesta si es la primera vez que entra a esta zona Y si no ha respondido en esta ronda
+        if (player.insideZoneIndex !== collidingZone.index && !player.hasResponded) {
           player.insideZoneIndex = collidingZone.index;
-          player.hasAnswered = true;
+          player.hasResponded = true; // Bloquea llamadas repetitivas de verificación
 
           const esCorrecto = this.questions.model.isCorrect(collidingZone.index);
           if (esCorrecto) {
@@ -307,8 +362,9 @@ _resetPlayerPositions() {
           }
         }
       } else {
-        // Si no está tocando ninguna zona, le permitimos volver a elegir
+        // Al salir al tablero neutral, puede volver a intentar
         player.insideZoneIndex = -1;
+        player.hasResponded = false; // <-- Esto permite rectificar
       }
     }
   }
@@ -317,7 +373,10 @@ _resetPlayerPositions() {
   // MANEJO DE CONSECUENCIAS (ESTRICTO CORAZÓN POR CORAZÓN)
   // --------------------------------------------------------
   _handleAcierto(player, zone) {
-    console.log(`[ACIERTO] Jugador ${player.id} respondió correctamente.`);
+    DebugLogger.logTrace('GameController', '_handleAcierto', `Acierto de ${player.id}`);
+
+    // Actualizar contador de aciertos
+    player.correctAnswers++;
 
     if (player.lives < 3) {
       player.lives += 1;
@@ -337,7 +396,10 @@ _resetPlayerPositions() {
   }
 
   _handleFallo(player, zone) {
-    console.log(`[FALLO] Jugador ${player.id} seleccionó una zona incorrecta.`);
+    DebugLogger.logTrace('GameController', '_handleFallo', `Fallo de ${player.id}`);
+
+    // Actualizar contador de errores
+    player.incorrectAnswers++;
 
     const now = performance.now();
     const result = player.loseLife(now);
@@ -352,9 +414,8 @@ _resetPlayerPositions() {
       player.score -= 25;
     }
     this.hud.renderScore(player);
-
     this.hud.renderLives(player);
-    this.board.flashHurtWithShield(player.id);
+    this.boardView.flashHurtWithShield(player.id);
 
     const zonesElements = document.querySelectorAll('.answer-zone');
     const zoneElement = zonesElements[zone.index];
@@ -363,18 +424,36 @@ _resetPlayerPositions() {
       zoneElement.classList.add('is-wrong');
     }
 
-    // Si ambos pierden todas las vidas (llegan a 0), entramos a GAMEOVER sin cargar nada más
-    if (!this.state.player1.alive && !this.state.player2.alive) {
-      this.state.phase = Phase.GAMEOVER;
-      this.hud.showGameover(true);
+    // Comprobar fin de juego: si un jugador muere, el otro gana inmediatamente
+    const p1 = this.state.player1;
+    const p2 = this.state.player2;
+
+    if (!p1.alive || !p2.alive) {
+      const winner = p1.alive ? p1 : p2;
+      const loser  = p1.alive ? p2 : p1;
+      this._triggerGameOver(winner, loser);
     }
+  }
+
+  /**
+   * Activa la pantalla de fin de juego con las estadísticas completas.
+   */
+  _triggerGameOver(winner, loser) {
+    DebugLogger.logTrace('GameController', '_triggerGameOver', `Ganador: ${winner.name}`);
+    this.state.phase = Phase.GAMEOVER;
+
+    // Reproducir audio de victoria y detener la música de juego
+    this.audioCtrl.playVictory();
+
+    // Mostrar pantalla de resultados
+    this.hud.showResults(winner, loser);
   }
 
   /* ========================================================
      RENDER
      ======================================================== */
   render() {
-    this.board.render(this.state);
+    this.boardView.render(this.state);
     this.hud.renderTimer(this.state.timeLeft);
   }
 }

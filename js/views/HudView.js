@@ -19,6 +19,15 @@ export class HudView {
     this.overlayStart = document.getElementById('overlay-start');
     this.overlayGameover = document.getElementById('overlay-gameover');
     this.gameoverTitle = document.getElementById('gameover-title');
+    this.gameoverSubtitle = document.getElementById('gameover-subtitle');
+
+    // --- Inputs y Labels ---
+    this.inputP1Name = document.getElementById('input-p1-name');
+    this.inputP2Name = document.getElementById('input-p2-name');
+    this.labels = {
+      p1: document.querySelector('#hud-p1 .hud__label'),
+      p2: document.querySelector('#hud-p2 .hud__label'),
+    };
 
     // --- Popup de pregunta ---
     this.overlayPopup = document.getElementById('overlay-question-popup');
@@ -58,9 +67,58 @@ export class HudView {
 
   showStart(show)    { this.overlayStart.classList.toggle('is-visible', show); }
 
-  showGameover(show, title = 'FIN') {
+  showGameover(show, title = 'FIN', subtitle = '') {
     this.gameoverTitle.textContent = title;
+    if (this.gameoverSubtitle) this.gameoverSubtitle.textContent = subtitle;
     this.overlayGameover.classList.toggle('is-visible', show);
+  }
+
+  /**
+   * Muestra la pantalla final con los resultados completos del ganador.
+   * @param {Player} winner  - El jugador ganador (aún vivo).
+   * @param {Player} loser   - El jugador derrotado.
+   */
+  showResults(winner, loser) {
+    const titleEl = this.gameoverTitle;
+    const subtitleEl = this.gameoverSubtitle;
+
+    // Título: nombre del ganador en mayúsculas
+    titleEl.textContent = `🏆 ${winner.name.toUpperCase()} GANA`;
+    titleEl.style.color = '#b6ff00';
+    titleEl.style.textShadow = '0 0 20px #b6ff00, 0 0 40px #b6ff00';
+
+    // Estadísticas detalladas del ganador
+    if (subtitleEl) {
+      subtitleEl.innerHTML = `
+        <div style="line-height:1.8; font-size:1.1rem;">
+          <div style="color:#b6ff00; font-size:1.4rem; margin-bottom:8px;">
+            ${winner.score} <span style="font-size:.9rem; color:#aaa;">puntos</span>
+          </div>
+          <div style="color:#00ffea;">
+            Aciertos: <strong>${winner.correctAnswers}</strong>
+            &nbsp;|&nbsp;
+            Errores: <strong style="color:#ff0055;">${winner.incorrectAnswers}</strong>
+          </div>
+          <div style="margin-top:12px; font-size:.85rem; color:#777; border-top: 1px solid #333; padding-top:10px;">
+            ${loser.name}: ${loser.score} pts — Aciertos: ${loser.correctAnswers} | Errores: ${loser.incorrectAnswers}
+          </div>
+        </div>
+      `;
+    }
+
+    this.overlayGameover.classList.add('is-visible');
+  }
+
+  getPlayerNames() {
+    return {
+      p1: this.inputP1Name ? this.inputP1Name.value.trim() : '',
+      p2: this.inputP2Name ? this.inputP2Name.value.trim() : ''
+    };
+  }
+
+  setPlayerNames(name1, name2) {
+    if (this.labels.p1) this.labels.p1.textContent = name1;
+    if (this.labels.p2) this.labels.p2.textContent = name2;
   }
 
   /* ---------- Popup de pregunta (10 s) ---------- */

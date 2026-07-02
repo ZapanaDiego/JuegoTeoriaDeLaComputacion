@@ -101,13 +101,20 @@
     <!-- ===================== OVERLAYS DE ESTADO ===================== -->
     <div id="overlay-start" class="overlay overlay--start is-visible">
       <h1 class="overlay__title">TC-SURVIVAL</h1>
+      
+      <div class="overlay__inputs" style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+        <input type="text" id="input-p1-name" placeholder="Nombre Jugador 1" style="padding: 10px; border-radius: 5px; border: 2px solid var(--c-neon-cyan); background: rgba(0,0,0,0.8); color: #fff; font-family: inherit; text-align: center; font-weight: bold; width: 180px; text-transform: uppercase;" autocomplete="off" />
+        <input type="text" id="input-p2-name" placeholder="Nombre Jugador 2" style="padding: 10px; border-radius: 5px; border: 2px solid var(--c-neon-pink); background: rgba(0,0,0,0.8); color: #fff; font-family: inherit; text-align: center; font-weight: bold; width: 180px; text-transform: uppercase;" autocomplete="off" />
+      </div>
+
       <p class="overlay__subtitle">P1: <strong>WASD</strong> &nbsp;·&nbsp; P2: <strong>Flechas</strong></p>
       <p class="overlay__hint">Pulsa <strong>ENTER</strong> para empezar</p>
     </div>
 
     <div id="overlay-gameover" class="overlay overlay--gameover">
       <h1 class="overlay__title" id="gameover-title">FIN</h1>
-      <p class="overlay__hint">Pulsa <strong>ENTER</strong> para reiniciar</p>
+      <p class="overlay__subtitle" id="gameover-subtitle" style="margin-bottom: 20px; font-size: 1.5rem; color: #fff; text-shadow: 0 0 10px var(--c-neon-cyan);"></p>
+      <p class="overlay__hint">¿Quieres una revancha? Presiona <strong>ENTER</strong></p>
     </div>
   </main>
 

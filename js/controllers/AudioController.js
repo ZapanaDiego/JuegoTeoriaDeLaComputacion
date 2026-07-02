@@ -8,9 +8,11 @@ export class AudioController{
     constructor(){
         this.bgmPrimary = new Audio('assets/audio/seg.mp3');
         this.bgmSecondary = new Audio('assets/audio/prim.mp3');
+        this.sfxVictory = new Audio('assets/audio/ganador.mp3'); // Audio de victoria
 
         this.bgmPrimary.loop = true;
         this.bgmSecondary.loop = true;
+        this.sfxVictory.loop = false;
 
         this.bgmPrimary.volume = 0.45;
         this.bgmSecondary.volume = 0.45;
@@ -27,7 +29,13 @@ export class AudioController{
     playSecondary(){
         this.stopCurrent();
         this.currentTrack = this.bgmSecondary;
-        this.currentTrack.play().catch(e => console.warn("El navegoadro bloque el autoplay: ", e));
+        this.currentTrack.play().catch(e => console.warn("El navegador bloqueo el autoplay: ", e));
+    }
+
+    playVictory(){
+        this.stopCurrent(); // Detenemos la música de fondo
+        this.sfxVictory.currentTime = 0;
+        this.sfxVictory.play().catch(e => console.warn("El navegador bloqueo el autoplay: ", e));
     }
 
     stopCurrent(){
