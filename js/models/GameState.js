@@ -85,19 +85,19 @@ export class GameState {
   }
 
   /**
-   * Genera entre 35 y 50 obstáculos por ronda.
+   * Genera entre 45 y 60 obstáculos por ronda.
    * Tamaños reducidos para garantizar pasillos navegables entre ellos.
    * Separación mínima de 48px (> 34px del jugador) garantizando paso siempre.
    */
   generateProceduralObstacles() {
     this.obstacles = [];
-    const numObstacles = Math.floor(Math.random() * 16) + 35; // 35–50
+    const numObstacles = Math.floor(Math.random() * 18) + 50; // 45–60
     DebugLogger.logMapGen(`Iniciando generación de mapa. Objetivo: ${numObstacles} obstáculos.`);
 
     // L-shape queda excluido: dos piezas juntas consumen demasiado espacio
     const types = ['rect-v', 'rect-h', 'circle'];
     let globalAttempts = 0;
-    const maxGlobalAttempts = 1500; // techo muy alto para alcanzar hasta 50 obstáculos
+    const maxGlobalAttempts = 2500; // techo extremo para alcanzar hasta 60 obstáculos
     let rejectedCount = 0;
 
     while (this.obstacles.length < numObstacles && globalAttempts < maxGlobalAttempts) {
