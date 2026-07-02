@@ -129,7 +129,7 @@ export class HudView {
     this.popupText.textContent  = question.text;
     this.popupFill.style.transition = 'none';
     this.popupFill.style.width = '100%';
-    this.popupLabel.textContent = '10';
+    this.popupLabel.textContent = '15';
     this.popupCard.classList.remove('is-exiting');
     this.overlayPopup.classList.add('is-visible');
   }

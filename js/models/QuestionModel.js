@@ -36,13 +36,32 @@ export class QuestionModel {
     this._remaining = [...this.questions];
   }
 
-  /** Devuelve una pregunta aleatoria sin repetir hasta agotar el banco. */
+  /** Devuelve una pregunta aleatoria sin repetir hasta agotar el banco.
+   *  Las respuestas se mezclan en cada llamada: la esquina correcta cambia cada ronda. */
   next() {
     if (this._remaining.length === 0) this._resetPool();
     const idx = Math.floor(Math.random() * this._remaining.length);
-    this.current = this._remaining.splice(idx, 1)[0];
+    // Clonamos la pregunta para no mutar el banco original
+    const raw = this._remaining.splice(idx, 1)[0];
+    const shuffled = this._shuffleAnswers(raw);
+    this.current = shuffled;
     DebugLogger.logTrace('QuestionModel', 'next', `Pregunta seleccionada: ID ${this.current.id}`);
     return this.current;
+  }
+
+  /**
+   * Mezcla el array de respuestas (Fisher-Yates) y devuelve una copia
+   * de la pregunta con las respuestas en orden aleatorio.
+   * La propiedad isCorrect viaja con cada objeto, por lo que
+   * QuestionModel.isCorrect(zoneIndex) sigue funcionando sin cambios.
+   */
+  _shuffleAnswers(question) {
+    const answers = [...question.answers]; // copia superficial del array
+    for (let i = answers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [answers[i], answers[j]] = [answers[j], answers[i]];
+    }
+    return { ...question, answers }; // nueva pregunta con answers mezclados
   }
 
   /** @returns {boolean} true si la zona elegida corresponde a la respuesta con isCorrect === 1. */

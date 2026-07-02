@@ -12,6 +12,7 @@ export const Phase = Object.freeze({
   QUESTION_POPUP: 'question_popup',   
   COUNTDOWN:      'countdown',         
   PLAYING:        'playing',
+  REVEAL_ANSWER:  'reveal_answer',
   GAMEOVER:       'gameover',
 });
 
@@ -31,7 +32,7 @@ export class GameState {
     });
 
     this.zones = [];        
-    this.roundTime = 20; // Ampliado para dar tiempo con obstáculos
+    this.roundTime = 50; // Ampliado para dar tiempo con obstáculos
     this.timeLeft = this.roundTime;
     this.players = [this.player1, this.player2];
     this.isEvaluatingAnswer = false; 
@@ -84,47 +85,36 @@ export class GameState {
   }
 
   /**
-   * Genera entre 12 y 20 obstáculos por ronda, con zonas de exclusión
-   * dinámicas (20% del tablero para las esquinas, radio 130px en el centro)
-   * y separación mínima de 60px entre piezas.
+   * Genera entre 35 y 50 obstáculos por ronda.
+   * Tamaños reducidos para garantizar pasillos navegables entre ellos.
+   * Separación mínima de 48px (> 34px del jugador) garantizando paso siempre.
    */
   generateProceduralObstacles() {
     this.obstacles = [];
-    // 12-20 obstáculos por mapa
-    const numObstacles = Math.floor(Math.random() * 9) + 12;
+    const numObstacles = Math.floor(Math.random() * 16) + 35; // 35–50
     DebugLogger.logMapGen(`Iniciando generación de mapa. Objetivo: ${numObstacles} obstáculos.`);
 
-    const types = ['rect-v', 'rect-h', 'circle', 'L-shape'];
+    // L-shape queda excluido: dos piezas juntas consumen demasiado espacio
+    const types = ['rect-v', 'rect-h', 'circle'];
     let globalAttempts = 0;
-    const maxGlobalAttempts = 400; // techo total para evitar while(true)
+    const maxGlobalAttempts = 1500; // techo muy alto para alcanzar hasta 50 obstáculos
     let rejectedCount = 0;
 
     while (this.obstacles.length < numObstacles && globalAttempts < maxGlobalAttempts) {
       globalAttempts++;
       const type = types[Math.floor(Math.random() * types.length)];
+      const { w, h } = this._getRandomObstacleSize(type);
+      // Margen interior de borde
+      const margin = 20;
+      const x = this.bounds.x + margin + Math.random() * (this.bounds.w - w - margin * 2);
+      const y = this.bounds.y + margin + Math.random() * (this.bounds.h - h - margin * 2);
+      const obstacle = { id: `obs-${this.obstacles.length}`, x, y, w, h, type };
 
-      if (type === 'L-shape') {
-        const parts = this._generateLShape();
-        if (parts && parts.every(p => this._isValidObstaclePosition(p))) {
-          parts.forEach(p => this.obstacles.push(p));
-          DebugLogger.logMapGen(`L-Shape aceptada`, { count: parts.length });
-        } else {
-          rejectedCount++;
-        }
+      if (this._isValidObstaclePosition(obstacle)) {
+        this.obstacles.push(obstacle);
+        DebugLogger.logMapGen(`Obstáculo aceptado: ${obstacle.id}`, { type, x: Math.floor(x), y: Math.floor(y) });
       } else {
-        const { w, h } = this._getRandomObstacleSize(type);
-        // Margen interior para que no queden pegados al borde
-        const margin = 15;
-        const x = this.bounds.x + margin + Math.random() * (this.bounds.w - w - margin * 2);
-        const y = this.bounds.y + margin + Math.random() * (this.bounds.h - h - margin * 2);
-        const obstacle = { id: `obs-${this.obstacles.length}`, x, y, w, h, type };
-
-        if (this._isValidObstaclePosition(obstacle)) {
-          this.obstacles.push(obstacle);
-          DebugLogger.logMapGen(`Obstáculo aceptado: ${obstacle.id}`, { type, x: Math.floor(x), y: Math.floor(y) });
-        } else {
-          rejectedCount++;
-        }
+        rejectedCount++;
       }
     }
 
@@ -162,16 +152,22 @@ export class GameState {
     ];
   }
 
-  /** Retorna dimensiones proporcionales por tipo. */
+  /**
+   * Retorna dimensiones reducidas por tipo para garantizar pasillos navegables.
+   * El jugador mide ~34px, así que los obstáculos no superan los 60px de grosor.
+   */
   _getRandomObstacleSize(type) {
     switch (type) {
       case 'rect-v':
-        return { w: Math.random() * 18 + 18, h: Math.random() * 80 + 50 };
+        // Pilar vertical: fino (12-22px) y moderadamente largo (40-75px)
+        return { w: Math.random() * 10 + 12, h: Math.random() * 35 + 40 };
       case 'rect-h':
-        return { w: Math.random() * 80 + 50, h: Math.random() * 18 + 18 };
+        // Barra horizontal: moderadamente larga (40-75px) y fina (12-22px)
+        return { w: Math.random() * 35 + 40, h: Math.random() * 10 + 12 };
       case 'circle':
       default: {
-        const d = Math.random() * 30 + 30;
+        // Pilares pequeños: diámetro 20-38px
+        const d = Math.random() * 18 + 20;
         return { w: d, h: d };
       }
     }
@@ -215,10 +211,11 @@ export class GameState {
       ) return false;
     }
 
-    // ── 3. Separación mínima de 60px con cada obstáculo ya colocado ────────
-    const MIN_SEP = 60;
+    // ── 3. Separación mínima de 48px + pasillo libre de 40px ──────────────────
+    // La caja expandida asegura que entre dos obs haya al menos 48px de espacio.
+    // El jugador mide 34px; 48px > 34px, garantizando paso siempre.
+    const MIN_SEP = 48;
     for (const placed of this.obstacles) {
-      // Expandimos la caja del obstáculo candidato 60px en cada dirección
       const expanded = {
         x: obs.x - MIN_SEP,
         y: obs.y - MIN_SEP,
@@ -226,9 +223,9 @@ export class GameState {
         h: obs.h + MIN_SEP * 2,
       };
       if (
-        expanded.x         < placed.x + placed.w &&
+        expanded.x           < placed.x + placed.w &&
         expanded.x + expanded.w > placed.x &&
-        expanded.y         < placed.y + placed.h &&
+        expanded.y           < placed.y + placed.h &&
         expanded.y + expanded.h > placed.y
       ) return false;
     }

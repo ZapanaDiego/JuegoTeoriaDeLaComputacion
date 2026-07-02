@@ -1,52 +1,59 @@
 /**
  * controllers/AudioController.js
- * Es para controlar el tipo de sonido que empezarà a sonar cada sierto tiempo
+ * Controla las pistas de audio del juego (BGM y efectos).
  */
 
 export class AudioController{
 
     constructor(){
-        this.bgmPrimary = new Audio('assets/audio/seg.mp3');
+        this.bgmPrimary   = new Audio('assets/audio/seg.mp3');
         this.bgmSecondary = new Audio('assets/audio/prim.mp3');
-        this.sfxVictory = new Audio('assets/audio/ganador.mp3'); // Audio de victoria
+        this.sfxVictory   = new Audio('assets/audio/ganador.mp3');
 
-        this.bgmPrimary.loop = true;
+        this.bgmPrimary.loop   = true;
         this.bgmSecondary.loop = true;
-        this.sfxVictory.loop = false;
+        this.sfxVictory.loop   = true;
 
-        this.bgmPrimary.volume = 0.45;
+        this.bgmPrimary.volume   = 0.45;
         this.bgmSecondary.volume = 0.45;
+        this.sfxVictory.volume   = 0.25; // Volumen reducido para la victoria
 
         this.currentTrack = null;
     }
 
     playPrimary(){
-        this.stopCurrent();
+        this.stopAll();
         this.currentTrack = this.bgmPrimary;
-        this.currentTrack.play().catch(e => console.warn("El navegador bloqueo el audtoplay: ", e));
+        this.currentTrack.currentTime = 0;
+        this.currentTrack.play().catch(e => console.warn('Autoplay bloqueado:', e));
     }
 
     playSecondary(){
-        this.stopCurrent();
+        this.stopAll();
         this.currentTrack = this.bgmSecondary;
-        this.currentTrack.play().catch(e => console.warn("El navegador bloqueo el autoplay: ", e));
+        this.currentTrack.currentTime = 0;
+        this.currentTrack.play().catch(e => console.warn('Autoplay bloqueado:', e));
     }
 
     playVictory(){
-        this.stopCurrent(); // Detenemos la música de fondo
+        this.stopAll(); // Detiene la BGM antes de lanzar la música de victoria
         this.sfxVictory.currentTime = 0;
-        this.sfxVictory.play().catch(e => console.warn("El navegador bloqueo el autoplay: ", e));
+        this.sfxVictory.play().catch(e => console.warn('Autoplay bloqueado:', e));
     }
 
     stopCurrent(){
         if(this.currentTrack){
             this.currentTrack.pause();
             this.currentTrack.currentTime = 0;
+            this.currentTrack = null;
         }
     }
 
+    /** Detiene ABSOLUTAMENTE todo el audio, incluyendo sfxVictory. */
     stopAll(){
         this.stopCurrent();
-        this.currentTrack = null;
+        // Detener la pista de victoria aunque no sea currentTrack
+        this.sfxVictory.pause();
+        this.sfxVictory.currentTime = 0;
     }
 }

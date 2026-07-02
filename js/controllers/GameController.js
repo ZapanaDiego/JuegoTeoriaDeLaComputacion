@@ -22,13 +22,12 @@ export class GameController {
     // Nombres persistentes entre rondas (sobreviven a la revancha)
     this._p1Name = 'Jugador 1';
     this._p2Name = 'Jugador 2';
-    this._namesRegistered = false; // false = primera vez, muestra inputs
+    this._namesRegistered = false;
 
-    // Temporizadores internos para el popup
     this._popupTimer = 0;
-    this._popupDuration = 10;   // segundos
-
-    // === MECANISMO DE BLOQUEO (COOLDOWN/LOCK) ===
+    this._popupDuration = 15;
+    this._revealTimer = 0;
+    this._revealDuration = 5;
     this._isEvaluating = false; 
   }
 
@@ -43,7 +42,6 @@ export class GameController {
     this.hud.showStart(true);
   }
 
-  /** FUNCIÓN AUXILIAR: Devuelve a los jugadores de forma segura a sus esquinas de origen */
 _resetPlayerPositions() {
     const centerX = this.state.bounds.w / 2;
     const centerY = this.state.bounds.h / 2;
@@ -58,7 +56,6 @@ _resetPlayerPositions() {
     }
   }
 
-  /** Comienza / reinicia la partida (lo dispara ENTER). */
   startGame() {
     DebugLogger.logTrace('GameController', 'startGame', 'Comenzando o reiniciando el juego');
     if (this.state.phase === Phase.PLAYING
@@ -146,11 +143,16 @@ _resetPlayerPositions() {
 
     if (this.state.phase === Phase.GAMEOVER) return;
 
+    if (this.state.phase === Phase.REVEAL_ANSWER) {
+      this._updateRevealTimer(dt);
+      return;
+    }
+
     // Ejecutamos el reloj de la ronda activa.
     this._updateTimer(dt);
 
     // Si el temporizador activó el GAMEOVER tras el descuento, cortamos el frame inmediatamente
-    if (this.state.phase === Phase.GAMEOVER) return;
+    if (this.state.phase === Phase.GAMEOVER || this.state.phase === Phase.REVEAL_ANSWER) return;
 
     // Movimiento físico y colisiones (solo si la ronda sigue su curso)
     this._updatePlayers(dt);   
@@ -164,20 +166,19 @@ _resetPlayerPositions() {
   _updateTimer(dt) {
     this.state.timeLeft -= dt;
     
+    // Averiguamos si todos los jugadores activos ya dejaron su respuesta
+    const activos = this.state.players.filter(p => p.alive);
+    const todosRespondieron = activos.length > 0 && activos.every(p => p.hasResponded);
+
+    // === CASO A: Todos respondieron antes de que termine el tiempo ===
+    if (todosRespondieron) {
+      this._startRevealPhase();
+      return;
+    }
+
     if (this.state.timeLeft <= 0) {
       this.state.timeLeft = 0;
       
-      // Averiguamos si todos los jugadores activos ya dejaron su respuesta
-      const activos = this.state.players.filter(p => p.alive);
-      const todosRespondieron = activos.length > 0 && activos.every(p => p.hasResponded);
-
-      // === CASO A: El tiempo llegó a 0 y los que están vivos ya respondieron ===
-      if (todosRespondieron) {
-        this.state.timeLeft = this.state.roundTime; 
-        this._cargarSiguientePregunta();
-        return;
-      }
-
       // === CASO B: Tiempo Agotado (Castigo a los que NO respondieron) ===
       console.log("[TIEMPO AGOTADO] Penalizando solo a los que no pisaron casilla.");
       const now = performance.now();
@@ -209,6 +210,29 @@ _resetPlayerPositions() {
         return;
       }
 
+      this._startRevealPhase();
+    }
+  }
+
+  // --------------------------------------------------------
+  // FASE DE REVELACIÓN (REVEAL_ANSWER)
+  // --------------------------------------------------------
+  _startRevealPhase() {
+    DebugLogger.logTrace('GameController', '_startRevealPhase', 'Mostrando respuesta correcta por 5s');
+    this.state.phase = Phase.REVEAL_ANSWER;
+    this._revealTimer = this._revealDuration;
+
+    // Buscar el índice de la respuesta correcta en la pregunta actual
+    const currentQ = this.questions.model.current;
+    if (currentQ) {
+      const correctIndex = currentQ.answers.findIndex(a => a.isCorrect === 1);
+      this.boardView.revealCorrectZone(correctIndex);
+    }
+  }
+
+  _updateRevealTimer(dt) {
+    this._revealTimer -= dt;
+    if (this._revealTimer <= 0) {
       this.state.timeLeft = this.state.roundTime;
       this._cargarSiguientePregunta();
     }
@@ -248,7 +272,7 @@ _resetPlayerPositions() {
     this.state.zones = this.boardView.readZones();
 
     // 7. Cambiar de fase de forma segura
-    this._popupTimer = this._popupDuration; // 10 segundos de lectura
+    this._popupTimer = this._popupDuration; // 15 segundos de lectura
     DebugLogger.logPhase(this.state.phase, Phase.QUESTION_POPUP);
     this.state.phase = Phase.QUESTION_POPUP;
   }
@@ -349,10 +373,12 @@ _resetPlayerPositions() {
       }
 
       if (collidingZone) {
-        // Evaluar la respuesta si es la primera vez que entra a esta zona Y si no ha respondido en esta ronda
-        if (player.insideZoneIndex !== collidingZone.index && !player.hasResponded) {
+        // Solo evaluar si el jugador NO ha respondido aún en esta ronda.
+        // hasResponded permanece true aunque salga de la zona:
+        // impide que re-entrar a cualquier zona genere daño extra.
+        if (!player.hasResponded) {
           player.insideZoneIndex = collidingZone.index;
-          player.hasResponded = true; // Bloquea llamadas repetitivas de verificación
+          player.hasResponded = true; // Bloqueo global de ronda — se resetea solo en nueva ronda
 
           const esCorrecto = this.questions.model.isCorrect(collidingZone.index);
           if (esCorrecto) {
@@ -362,9 +388,9 @@ _resetPlayerPositions() {
           }
         }
       } else {
-        // Al salir al tablero neutral, puede volver a intentar
+        // El jugador está fuera de toda zona — solo actualizar posición, NO resetear hasResponded
         player.insideZoneIndex = -1;
-        player.hasResponded = false; // <-- Esto permite rectificar
+        // hasResponded se resetea únicamente en _cargarSiguientePregunta (nueva ronda)
       }
     }
   }
@@ -407,12 +433,7 @@ _resetPlayerPositions() {
     // Si estaba invulnerable, no aplica daño
     if (result === false) return;
 
-    // Disminuir puntos -25 (mínimo 0)
-    if (player.score < 25) {
-      player.score = 0;
-    } else {
-      player.score -= 25;
-    }
+    // Los puntos NO se restan al fallar: solo se pierde vida
     this.hud.renderScore(player);
     this.hud.renderLives(player);
     this.boardView.flashHurtWithShield(player.id);

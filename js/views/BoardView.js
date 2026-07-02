@@ -79,7 +79,23 @@ export class BoardView {
 
   /** Limpia visualmente los estados correct/wrong de las zonas de respuesta. */
   resetZones() {
-    this.zoneEls.forEach(el => el.classList.remove('is-correct', 'is-wrong'));
+    this.zoneEls.forEach(el => {
+      el.classList.remove('is-correct', 'is-wrong');
+      el.style.opacity = '1';
+    });
+  }
+
+  /** Muestra la respuesta correcta y atenúa las incorrectas. */
+  revealCorrectZone(correctIndex) {
+    this.zoneEls.forEach((el, index) => {
+      if (index === correctIndex) {
+        el.classList.add('is-correct');
+        el.style.opacity = '1';
+      } else {
+        el.classList.remove('is-correct', 'is-wrong');
+        el.style.opacity = '0.3';
+      }
+    });
   }
 
   /** Render principal por frame. */

@@ -16,7 +16,7 @@ export class Player {
     this.y = opts.y ?? 0;
     this.w = opts.w ?? 34;
     this.h = opts.h ?? 34;
-    this.speed = opts.speed ?? 260;     // px/segundo (aumentado por mayor densidad de obstáculos)
+    this.speed = opts.speed ?? 210;     // px/segundo (ligeramente reducido)
     this.lives = opts.lives ?? 3;
     this.invulnerableUntil = 0;          // timestamp (ms) para i-frames tras recibir daño
     this.alive = true;
