@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TC-Survival · Teoría de la Computación</title>
+
+  <!-- ===== ESTILOS (separados por responsabilidad) ===== -->
+  <link rel="stylesheet" href="styles/theme.css" />   <!-- Paleta Splatterpunk / Neopunk, variables, fuentes -->
+  <link rel="stylesheet" href="styles/board.css" />   <!-- Tablero 2D, personajes, misil -->
+  <link rel="stylesheet" href="styles/hud.css" />     <!-- HUD, vidas, temporizador, panel de preguntas -->
+</head>
+<body>
+  <!-- ============================================================
+       CONTENEDOR PRINCIPAL (PLANO 2D)
+       Límites fijos definidos en CSS. Todo elemento que se mueve
+       por JS (jugadores, misil) usa position:absolute relativo a él.
+       ============================================================ -->
+  <main id="game-container" class="game-container">
+
+    <!-- ===================== HUD SUPERIOR ===================== -->
+    <header id="hud" class="hud">
+
+      <!-- Vidas Jugador 1 (3 corazones) -->
+      <section id="hud-p1" class="hud__player hud__player--p1" data-player="1">
+        <div class="hud__player-info">
+          <span class="hud__label">P1</span>
+          <div class="hud__hearts" id="hearts-p1">
+            <span class="heart" data-index="0"></span>
+            <span class="heart" data-index="1"></span>
+            <span class="heart" data-index="2"></span>
+          </div>
+        </div>
+        <div class="hud__score" id="score-p1">PTS: 0</div>
+      </section>
+
+      <!-- Temporizador central -->
+      <section id="hud-timer" class="hud__timer">
+        <span id="timer-value" class="hud__timer-value">00</span>
+      </section>
+
+      <!-- Vidas Jugador 2 (3 corazones) -->
+      <section id="hud-p2" class="hud__player hud__player--p2" data-player="2">
+        <div class="hud__player-info">
+          <div class="hud__hearts" id="hearts-p2">
+            <span class="heart" data-index="0"></span>
+            <span class="heart" data-index="1"></span>
+            <span class="heart" data-index="2"></span>
+          </div>
+          <span class="hud__label">P2</span>
+        </div>
+        <div class="hud__score" id="score-p2">PTS: 0</div>
+      </section>
+    </header>
+
+    <!-- ============== PANEL DE PREGUNTAS (temporal) ==============
+         Aparece centrado/arriba. Ocultado según requerimiento (solo en popup).
+         ============================================================ -->
+    <section id="question-panel" class="question-panel" aria-live="polite" style="display: none;">
+      <span class="question-panel__topic" id="question-topic">TEMA</span>
+      <p class="question-panel__text" id="question-text">Esperando pregunta…</p>
+    </section>
+
+    <!-- ===================== TABLERO 2D ===================== -->
+    <section id="board" class="board">
+
+      <!-- Las 4 esquinas = ZONAS DE RESPUESTA (IDs requeridos) -->
+      <div id="zone-top-left"     class="answer-zone answer-zone--tl"     data-zone="0"><span class="answer-zone__text"></span></div>
+      <div id="zone-top-right"    class="answer-zone answer-zone--tr"     data-zone="1"><span class="answer-zone__text"></span></div>
+      <div id="zone-bottom-left"  class="answer-zone answer-zone--bl"     data-zone="2"><span class="answer-zone__text"></span></div>
+      <div id="zone-bottom-right" class="answer-zone answer-zone--br"     data-zone="3"><span class="answer-zone__text"></span></div>
+
+      <!-- Personajes (movidos por JS con position:absolute) -->
+      <div id="player1" class="entity player player--p1" data-player="1"></div>
+      <div id="player2" class="entity player player--p2" data-player="2"></div>
+
+      <!-- Misil perseguidor (movido por JS) -->
+      <div id="missile" class="entity missile"></div>
+
+      <!-- Capa de elementos flotantes / decoración (partículas, salpicaduras) -->
+      <div id="floating-layer" class="floating-layer" aria-hidden="true"></div>
+    </section>
+
+    <!-- ============ OVERLAY: POPUP DE PREGUNTA (10 s) ============ -->
+    <div id="overlay-question-popup" class="overlay overlay--question-popup">
+      <div class="popup-card">
+        <span class="popup-card__badge" id="popup-topic">TEMA</span>
+        <p class="popup-card__text" id="popup-text">Pregunta…</p>
+        <div class="popup-card__timer-bar">
+          <div class="popup-card__timer-fill" id="popup-timer-fill"></div>
+        </div>
+        <span class="popup-card__timer-label" id="popup-timer-label">10</span>
+      </div>
+    </div>
+
+    <!-- ============ OVERLAY: CUENTA REGRESIVA 3-2-1 ============ -->
+    <div id="overlay-countdown" class="overlay overlay--countdown">
+      <span class="countdown__number" id="countdown-number">3</span>
+    </div>
+
+    <!-- ===================== OVERLAYS DE ESTADO ===================== -->
+    <div id="overlay-start" class="overlay overlay--start is-visible">
+      <h1 class="overlay__title">TC-SURVIVAL</h1>
+      
+      <div class="overlay__inputs" style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+        <input type="text" id="input-p1-name" placeholder="Nombre Jugador 1" style="padding: 10px; border-radius: 5px; border: 2px solid var(--c-neon-cyan); background: rgba(0,0,0,0.8); color: #fff; font-family: inherit; text-align: center; font-weight: bold; width: 180px; text-transform: uppercase;" autocomplete="off" />
+        <input type="text" id="input-p2-name" placeholder="Nombre Jugador 2" style="padding: 10px; border-radius: 5px; border: 2px solid var(--c-neon-pink); background: rgba(0,0,0,0.8); color: #fff; font-family: inherit; text-align: center; font-weight: bold; width: 180px; text-transform: uppercase;" autocomplete="off" />
+      </div>
+
+      <p class="overlay__subtitle">P1: <strong>WASD</strong> &nbsp;·&nbsp; P2: <strong>Flechas</strong></p>
+      <p class="overlay__hint">Pulsa <strong>ENTER</strong> para empezar</p>
+    </div>
+
+    <div id="overlay-gameover" class="overlay overlay--gameover">
+      <h1 class="overlay__title" id="gameover-title">FIN</h1>
+      <p class="overlay__subtitle" id="gameover-subtitle" style="margin-bottom: 20px; font-size: 1.5rem; color: #fff; text-shadow: 0 0 10px var(--c-neon-cyan);"></p>
+      <p class="overlay__hint">¿Quieres una revancha? Presiona <strong>ENTER</strong></p>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       JAVASCRIPT (msódulos ES6). game.js es el punto de entrada y
+       orquesta Modelos, Vistas y Controladores (MVC).
+       =========================2222=================================== -->
+  <script type="module" src="js/game.js"></script>
+</body>
+
+
+
+</html>
